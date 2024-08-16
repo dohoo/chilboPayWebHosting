@@ -16,6 +16,7 @@ lib 하위 폴더에서 만드시면 됩니다. lib 폴더 코드 쭉 읽어 보
 - [깃, 깃허브 사용법 참고](https://sseozytank.tistory.com/41)
 - [깃허브 For 플러터 참고](https://velog.io/@tlsgks48/GitHub-%EA%B9%83%ED%97%88%EB%B8%8C-Repository%EC%97%90-%EC%BD%94%EB%93%9C-%EC%98%AC%EB%A6%AC%EA%B8%B0-%EB%B0%8F-%EA%B0%80%EC%A0%B8%EC%98%A4%EA%B8%B0)
 
+각자 브랜치 만들어서 거기에다 올려주세요. 예를들어, test 브랜치를 새로 만들어서 test 브랜치에만 push 하면 됩니다.
 push 할 때는 무엇을 어떻게 수정했는지, 뭘 추가했는지 메시지를 구체적으로 써서 올려주세요.
 
 ## 서버 
