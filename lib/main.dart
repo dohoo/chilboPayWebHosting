@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chilbopay/screens/login_page.dart';
+import 'package:chilbopay/screens/login/login_page.dart';
 
 void main() {
   runApp(MyApp());

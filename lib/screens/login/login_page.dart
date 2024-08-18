@@ -3,9 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'signup_page.dart';
-import 'admin_page.dart';
-import 'user_page.dart';
-import 'festival_page.dart'; // Import the festival page
+import '../admin/admin_page.dart';
+import '../user/user_page.dart';
+import '../festival/festival_page.dart'; // Import the festival page
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginPage extends StatefulWidget {

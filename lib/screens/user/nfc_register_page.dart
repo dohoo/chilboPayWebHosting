@@ -3,17 +3,17 @@ import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../services/api_service.dart';
+import '../../services/api_service.dart';
 
-class NfcUnregisterPage extends StatefulWidget {
+class NfcRegisterPage extends StatefulWidget {
   @override
-  _NfcUnregisterPageState createState() => _NfcUnregisterPageState();
+  _NfcRegisterPageState createState() => _NfcRegisterPageState();
 }
 
-class _NfcUnregisterPageState extends State<NfcUnregisterPage> {
+class _NfcRegisterPageState extends State<NfcRegisterPage> {
   String message = 'Please tap your NFC card';
 
-  Future<void> _unregisterNfcCard() async {
+  Future<void> _registerNfcCard() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('userId');
@@ -26,7 +26,7 @@ class _NfcUnregisterPageState extends State<NfcUnregisterPage> {
         context,
             (accessToken) {
           return http.post(
-            Uri.parse('https://chilbopay.com/unregister-nfc'),
+            Uri.parse('https://chilbopay.com/register-nfc'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',
@@ -39,19 +39,19 @@ class _NfcUnregisterPageState extends State<NfcUnregisterPage> {
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         setState(() {
-          message = 'NFC card unregistered successfully';
+          message = 'NFC card registered successfully';
         });
       } else {
         final data = jsonDecode(response.body);
         setState(() {
-          message = 'Failed to unregister NFC card: ${data['message']}';
+          message = 'Failed to register NFC card: ${data['message']}';
         });
       }
     } catch (e) {
       setState(() {
-        message = 'Failed to unregister NFC card: $e';
+        message = 'Failed to register NFC card: $e';
       });
       // Do not logout immediately on error, as it might be a temporary issue
     } finally {
@@ -62,14 +62,14 @@ class _NfcUnregisterPageState extends State<NfcUnregisterPage> {
   @override
   void initState() {
     super.initState();
-    _unregisterNfcCard();
+    _registerNfcCard();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Unregister NFC Card'),
+        title: Text('Register NFC Card'),
       ),
       body: Center(
         child: Padding(

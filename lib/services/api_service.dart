@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../screens/login_page.dart';
+import '../screens/login/login_page.dart';
 
 class ApiService {
   static const String baseUrl = 'https://chilbopay.com';

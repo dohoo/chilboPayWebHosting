@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'festival_account_management_page.dart'; // 추가
+import '../festival/festival_account_management_page.dart'; // 추가
 
 class SettingsPage extends StatelessWidget {
   @override

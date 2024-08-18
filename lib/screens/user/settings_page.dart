@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'login_page.dart';
+import '../login/login_page.dart';
 import 'nfc_register_page.dart';
 import 'nfc_unregister_page.dart';
-import '../services/api_service.dart';
+import '../../services/api_service.dart';
 
 class SettingsPage extends StatefulWidget {
   @override

@@ -9,8 +9,6 @@ lib 하위 폴더에서 만드시면 됩니다. lib 폴더 코드 쭉 읽어 보
 
 [디자인 참고](https://www.figma.com/design/QWbpSQLCdQjO8MkyKMABvK/%EC%B9%A0%EB%B3%B4%ED%8E%98%EC%9D%B4?node-id=0-1&t=gRFwPyncdcnqWXIV-0) 아직 미완
 
-웬만하면 import 부분은 수정 안 하는게 좋아요. 만약 수정을 하고 싶다면 폴더 경로 잘 설정하시길 바랍니다. 
-
 ## 안드로이드 스튜디오에서 깃허브 사용 방법
 
 - [깃, 깃허브 사용법 참고](https://sseozytank.tistory.com/41)

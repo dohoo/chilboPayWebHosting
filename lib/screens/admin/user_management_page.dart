@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../services/api_service.dart';
-import 'no_negative_number_formatter.dart';
+import '../../services/api_service.dart';
+import '../no_negative_number_formatter.dart';
 
 class UserManagementPage extends StatefulWidget {
   @override
