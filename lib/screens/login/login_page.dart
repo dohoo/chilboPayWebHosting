@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (refreshToken != null) {
       final response = await http.post(
-        Uri.parse('https://chilbopay.com/token'),
+        Uri.parse('http://114.204.195.233/token'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _login() async {
     try {
       final response = await http.post(
-        Uri.parse('https://chilbopay.com/login'),
+        Uri.parse('http://114.204.195.233/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

@@ -35,7 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/user/$userId'),
+            Uri.parse('http://114.204.195.233/user/$userId'),
             headers: {
               'Authorization': 'Bearer $accessToken',
             },
@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
         context,
             (accessToken) {
           return http.put(
-            Uri.parse('https://chilbopay.com/user/$userId'),
+            Uri.parse('http://114.204.195.233/user/$userId'),
             headers: {
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',
@@ -126,7 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
         context,
             (accessToken) {
           return http.delete(
-            Uri.parse('https://chilbopay.com/user/$userId'),
+            Uri.parse('http://114.204.195.233/user/$userId'),
             headers: {
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',
@@ -170,7 +170,7 @@ class _SettingsPageState extends State<SettingsPage> {
         context,
             (accessToken) {
           return http.post(
-            Uri.parse('https://chilbopay.com/logout'),
+            Uri.parse('http://114.204.195.233/logout'),
             headers: {
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',

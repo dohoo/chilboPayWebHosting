@@ -25,7 +25,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/transactions'),
+            Uri.parse('http://114.204.195.233/transactions'),
             headers: {
               'Authorization': 'Bearer $accessToken',
             },

@@ -27,7 +27,7 @@ class _TransactionPageState extends State<TransactionPage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/user/$senderId'),
+            Uri.parse('http://114.204.195.233/user/$senderId'),
             headers: {
               'Authorization': 'Bearer $accessToken',
             },
@@ -55,7 +55,7 @@ class _TransactionPageState extends State<TransactionPage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/user/by-username/$receiverUsername'),
+            Uri.parse('http://114.204.195.233/user/by-username/$receiverUsername'),
             headers: {
               'Authorization': 'Bearer $accessToken',
             },
@@ -78,7 +78,7 @@ class _TransactionPageState extends State<TransactionPage> {
         context,
             (accessToken) {
           return http.post(
-            Uri.parse('https://chilbopay.com/transaction'),
+            Uri.parse('http://114.204.195.233/transaction'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',

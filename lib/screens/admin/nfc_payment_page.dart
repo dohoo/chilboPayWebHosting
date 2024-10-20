@@ -34,7 +34,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/user/by-card/$cardId'),
+            Uri.parse('http://114.204.195.233/user/by-card/$cardId'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',
@@ -59,7 +59,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
         context,
             (accessToken) {
           return http.post(
-            Uri.parse('https://chilbopay.com/purchase'),
+            Uri.parse('http://114.204.195.233/purchase'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',

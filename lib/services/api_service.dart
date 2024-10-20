@@ -6,7 +6,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../screens/login/login_page.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://chilbopay.com';
+  static const String baseUrl = 'http://114.204.195.233';
 
   // Helper function to get token from SharedPreferences
   static Future<String?> _getToken(String key) async {

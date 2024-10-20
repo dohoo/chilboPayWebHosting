@@ -26,7 +26,7 @@ class _NfcUnregisterPageState extends State<NfcUnregisterPage> {
         context,
             (accessToken) {
           return http.post(
-            Uri.parse('https://chilbopay.com/unregister-nfc'),
+            Uri.parse('http://114.204.195.233/unregister-nfc'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',

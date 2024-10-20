@@ -26,7 +26,7 @@ class _NfcRegisterPageState extends State<NfcRegisterPage> {
         context,
             (accessToken) {
           return http.post(
-            Uri.parse('https://chilbopay.com/register-nfc'),
+            Uri.parse('http://114.204.195.233/register-nfc'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Authorization': 'Bearer $accessToken',

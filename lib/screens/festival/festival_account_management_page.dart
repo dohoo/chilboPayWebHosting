@@ -17,7 +17,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
   }
 
   Future<void> fetchFestivalAccounts() async {
-    final response = await http.get(Uri.parse('https://chilbopay.com/festivalAccounts'));
+    final response = await http.get(Uri.parse('http://114.204.195.233/festivalAccounts'));
     if (response.statusCode == 200) {
       setState(() {
         festivalAccounts = json.decode(response.body);
@@ -29,7 +29,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
 
   Future<void> createFestivalAccount(String username, String password) async {
     final response = await http.post(
-      Uri.parse('https://chilbopay.com/signup'),
+      Uri.parse('http://114.204.195.233/signup'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -49,7 +49,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
 
   Future<void> updateFestivalAccount(int id, String username, String password) async {
     final response = await http.put(
-      Uri.parse('https://chilbopay.com/user/$id'),
+      Uri.parse('http://114.204.195.233/user/$id'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -68,7 +68,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
 
   Future<void> addFestivalProduct(int festivalId, String name, double price) async {
     final response = await http.post(
-      Uri.parse('https://chilbopay.com/festivalProducts'),
+      Uri.parse('http://114.204.195.233/festivalProducts'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -88,7 +88,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
 
   Future<void> updateFestivalProduct(int id, String name, double price) async {
     final response = await http.put(
-      Uri.parse('https://chilbopay.com/festivalProducts/$id'),
+      Uri.parse('http://114.204.195.233/festivalProducts/$id'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -106,7 +106,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
   }
 
   Future<List<dynamic>> fetchFestivalProducts(int festivalId) async {
-    final response = await http.get(Uri.parse('https://chilbopay.com/festivalProducts?festivalId=$festivalId'));
+    final response = await http.get(Uri.parse('http://114.204.195.233/festivalProducts?festivalId=$festivalId'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {

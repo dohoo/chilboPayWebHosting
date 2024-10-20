@@ -30,7 +30,7 @@ class _FestivalPageState extends State<FestivalPage> {
 
       if (userId != null && accessToken != null) {
         final response = await http.get(
-          Uri.parse('https://chilbopay.com/user/$userId'),
+          Uri.parse('http://114.204.195.233/user/$userId'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Authorization': 'Bearer $accessToken',
@@ -64,7 +64,7 @@ class _FestivalPageState extends State<FestivalPage> {
 
       if (accessToken != null) {
         final response = await http.get(
-          Uri.parse('https://chilbopay.com/festivalProducts'),
+          Uri.parse('http://114.204.195.233/festivalProducts'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Authorization': 'Bearer $accessToken',

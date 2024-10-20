@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/user/$userId'),
+            Uri.parse('http://114.204.195.233/user/$userId'),
             headers: {
               'Authorization': 'Bearer $accessToken',
             },
@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
         context,
             (accessToken) {
           return http.get(
-            Uri.parse('https://chilbopay.com/transactions/$userId'),
+            Uri.parse('http://114.204.195.233/transactions/$userId'),
             headers: {
               'Authorization': 'Bearer $accessToken',
             },

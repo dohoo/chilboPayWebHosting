@@ -31,7 +31,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
 
       // Fetch userId using cardId
       final userResponse = await http.get(
-        Uri.parse('https://chilbopay.com/user/by-card/$cardId'),
+        Uri.parse('http://114.204.195.233/user/by-card/$cardId'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer ${await _getAccessToken()}',
@@ -51,7 +51,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
 
       // Proceed with payment
       final response = await http.post(
-        Uri.parse('https://chilbopay.com/festival-purchase'),
+        Uri.parse('http://114.204.195.233/festival-purchase'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer ${await _getAccessToken()}',

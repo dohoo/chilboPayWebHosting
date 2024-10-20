@@ -20,7 +20,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   Future<void> fetchTotalUserMoney() async {
     try {
-      final response = await http.get(Uri.parse('https://chilbopay.com/totalUserMoney'));
+      final response = await http.get(Uri.parse('http://114.204.195.233/totalUserMoney'));
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
