@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'transactions_page.dart';
+import '../../services/admin_api.dart'; // AdminApi import
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -20,18 +19,10 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   Future<void> fetchTotalUserMoney() async {
     try {
-      final response = await http.get(Uri.parse('http://114.204.195.233/totalUserMoney'));
-
-      if (response.statusCode == 200) {
-        final jsonResponse = json.decode(response.body);
-        setState(() {
-          _totalUserMoney = int.parse(jsonResponse['total']); // 문자열을 정수로 변환
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Failed to load statistics';
-        });
-      }
+      final totalMoney = await AdminApi.fetchTotalUserMoney(); // AdminApi 사용
+      setState(() {
+        _totalUserMoney = totalMoney;
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Error: $e';

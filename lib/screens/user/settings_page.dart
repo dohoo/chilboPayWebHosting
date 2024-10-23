@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../services/user_api.dart';
 import '../login/login_page.dart';
 import 'nfc_register_page.dart';
 import 'nfc_unregister_page.dart';
-import '../../services/api_service.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -30,35 +28,23 @@ class _SettingsPageState extends State<SettingsPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('userId');
 
-    try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/user/$userId'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
-      );
+    if (userId == null) {
+      _logout();
+      return;
+    }
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          username = data['username'];
-          nfcCardId = data['nfcCardId'] ?? '';
-          isSuspended = data['status'] == 'suspended';
-        });
-      } else {
-        throw Exception('Failed to load user data');
-      }
+    try {
+      final data = await UserApi.fetchUserData(userId);
+      setState(() {
+        username = data['username'];
+        nfcCardId = data['nfcCardId'] ?? '';
+        isSuspended = data['status'] == 'suspended';
+      });
     } catch (e) {
-      print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load user data')),
+        SnackBar(content: Text('Failed to load user data: $e')),
       );
-      await ApiService.logout(context); // Ensure logout is called on error
+      _logout();
     }
   }
 
@@ -72,42 +58,21 @@ class _SettingsPageState extends State<SettingsPage> {
     final userId = prefs.getInt('userId');
 
     try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.put(
-            Uri.parse('http://114.204.195.233/user/$userId'),
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-            body: jsonEncode(<String, String>{
-              if (newUsername != null) 'username': newUsername,
-              if (newPassword != null) 'password': newPassword,
-            }),
-          );
-        },
+      await UserApi.updateUser(userId!,
+        username: newUsername,
+        password: newPassword,
       );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('User updated successfully')),
-        );
-        _fetchUserData();
-        _usernameController.clear();
-        _passwordController.clear();
-        _confirmPasswordController.clear();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update user')),
-        );
-      }
-    } catch (e) {
-      print('Error updating user: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update user')),
+        SnackBar(content: Text('User updated successfully')),
       );
-      // Do not logout immediately on error, as it might be a temporary issue
+      _fetchUserData();
+      _usernameController.clear();
+      _passwordController.clear();
+      _confirmPasswordController.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update user: $e')),
+      );
     }
   }
 
@@ -119,87 +84,31 @@ class _SettingsPageState extends State<SettingsPage> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('userId');
-    final refreshToken = prefs.getString('refresh_token') ?? '';
 
     try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.delete(
-            Uri.parse('http://114.204.195.233/user/$userId'),
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-            body: jsonEncode(<String, String>{
-              'refreshToken': refreshToken,
-            }),
-          );
-        },
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account deleted successfully')),
-        );
-        await prefs.clear();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete account')),
-        );
-      }
-    } catch (e) {
-      print('Error deleting account: $e');
+      await UserApi.deleteUser(userId!);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete account')),
+        SnackBar(content: Text('Account deleted successfully')),
       );
-      // Do not logout immediately on error, as it might be a temporary issue
+      await prefs.clear();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete account: $e')),
+      );
     }
   }
 
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final refreshToken = prefs.getString('refresh_token') ?? '';
-
-    try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.post(
-            Uri.parse('http://114.204.195.233/logout'),
-            headers: {
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-            body: jsonEncode(<String, String>{
-              'refreshToken': refreshToken,
-            }),
-          );
-        },
-      );
-
-      if (response.statusCode == 200) {
-        await prefs.clear();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to logout')),
-        );
-      }
-    } catch (e) {
-      print('Error logging out: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to logout')),
-      );
-      // Do not logout immediately on error, as it might be a temporary issue
-    }
+    await prefs.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   void _showSuspendedMessage() {
@@ -369,9 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Text('Update Password'),
             ),
             ElevatedButton(
-              onPressed: isSuspended
-                  ? _showSuspendedMessage
-                  : () {
+              onPressed: isSuspended ? _showSuspendedMessage : () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => NfcRegisterPage()),
@@ -380,9 +287,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Text('Register NFC Card'),
             ),
             ElevatedButton(
-              onPressed: isSuspended
-                  ? _showSuspendedMessage
-                  : () {
+              onPressed: isSuspended ? _showSuspendedMessage : () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => NfcUnregisterPage()),

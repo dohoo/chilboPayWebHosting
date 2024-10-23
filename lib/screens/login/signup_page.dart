@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../services/login_api.dart'; // LoginApi import
 import 'terms_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -30,16 +29,9 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse('https://chilbopay.com/signup'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'username': _usernameController.text,
-          'password': _passwordController.text,
-          'role': 'user',
-        }),
+      final response = await LoginApi.signUp(  // LoginApi 사용
+        _usernameController.text,
+        _passwordController.text,
       );
 
       if (response.statusCode == 201) {

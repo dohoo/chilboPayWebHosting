@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../../services/api_service.dart';
+import '../../services/admin_api.dart'; // AdminApi import
 
 class NfcPaymentPage extends StatefulWidget {
   @override
@@ -30,63 +28,19 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
       String cardId = tag.id;
 
       // Fetch userId using cardId
-      final userResponse = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/user/by-card/$cardId'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
-      );
-
-      if (userResponse.statusCode != 200) {
-        setState(() {
-          message = 'Failed to fetch user information';
-        });
-        await FlutterNfcKit.finish();
-        return;
-      }
-
-      final userData = jsonDecode(userResponse.body);
+      final userData = await AdminApi.fetchUserByCard(cardId);
       final userId = userData['userId'];
 
       // Proceed with payment
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.post(
-            Uri.parse('http://114.204.195.233/purchase'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-            body: jsonEncode(<String, dynamic>{
-              'userId': userId,
-              'productId': productId,
-            }),
-          );
-        },
-      );
+      final result = await AdminApi.processPayment(userId, productId);
 
-      if (response.statusCode == 201) {
-        setState(() {
-          message = 'NFC card payment successful';
-        });
-      } else {
-        final data = jsonDecode(response.body);
-        setState(() {
-          message = 'Failed to pay with NFC card: ${data['message']}';
-        });
-      }
+      setState(() {
+        message = result['message'];
+      });
     } catch (e) {
       setState(() {
         message = 'Failed to pay with NFC card: $e';
       });
-      // Do not logout immediately on error, as it might be a temporary issue
     } finally {
       await FlutterNfcKit.finish();
     }

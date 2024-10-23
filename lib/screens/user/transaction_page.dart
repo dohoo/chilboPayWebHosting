@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import '../no_negative_number_formatter.dart';
-import '../../services/api_service.dart';
 
 class TransactionPage extends StatefulWidget {
   @override
@@ -22,17 +21,9 @@ class _TransactionPageState extends State<TransactionPage> {
     final amount = int.parse(_amountController.text);
 
     try {
-      // Fetch sender information with access token to check status
-      final senderResponse = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/user/$senderId'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
+      // Fetch sender information
+      final senderResponse = await http.get(
+        Uri.parse('http://114.204.195.233/user/$senderId'),
       );
 
       if (senderResponse.statusCode != 200) {
@@ -50,17 +41,9 @@ class _TransactionPageState extends State<TransactionPage> {
         return;
       }
 
-      // Fetch receiver information with access token
-      final receiverResponse = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/user/by-username/$receiverUsername'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
+      // Fetch receiver information
+      final receiverResponse = await http.get(
+        Uri.parse('http://114.204.195.233/user/by-username/$receiverUsername'),
       );
 
       if (receiverResponse.statusCode != 200) {
@@ -73,23 +56,17 @@ class _TransactionPageState extends State<TransactionPage> {
       final receiverData = jsonDecode(receiverResponse.body);
       final receiverId = receiverData['id'];
 
-      // Transaction with access token
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.post(
-            Uri.parse('http://114.204.195.233/transaction'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-            body: jsonEncode(<String, dynamic>{
-              'senderId': senderId,
-              'receiverId': receiverId,
-              'amount': amount.toDouble(),
-            }),
-          );
+      // Perform the transaction
+      final response = await http.post(
+        Uri.parse('http://114.204.195.233/transaction'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
         },
+        body: jsonEncode(<String, dynamic>{
+          'senderId': senderId,
+          'receiverId': receiverId,
+          'amount': amount.toDouble(),
+        }),
       );
 
       print('Server response: ${response.body}');
@@ -110,7 +87,6 @@ class _TransactionPageState extends State<TransactionPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An unexpected error occurred')),
       );
-      // Do not logout immediately on error, as it might be a temporary issue
     }
   }
 

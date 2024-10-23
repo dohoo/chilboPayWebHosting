@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'festival_nfc_payment_page.dart';
-import '../../services/api_service.dart';
+import '../login/login_page.dart';
+import '../../services/festival_api.dart'; // FestivalApi import
 
 class FestivalPage extends StatefulWidget {
   @override
@@ -25,32 +24,19 @@ class _FestivalPageState extends State<FestivalPage> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('userId');
-      final accessToken = prefs.getString('access_token');
       final role = prefs.getString('role');
 
-      if (userId != null && accessToken != null) {
-        final response = await http.get(
-          Uri.parse('http://114.204.195.233/user/$userId'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer $accessToken',
-          },
-        );
+      if (userId != null) {
+        final data = await FestivalApi.fetchUserData(userId); // FestivalApi 사용
+        setState(() {
+          username = data['username'];
+        });
 
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          setState(() {
-            username = data['username'];
-          });
-
-          if (role == 'festival') {
-            await prefs.setInt('festivalId', userId); // Store the festivalId
-          }
-        } else {
-          print('Failed to load user data. Status code: ${response.statusCode}');
+        if (role == 'festival') {
+          await prefs.setInt('festivalId', userId); // Store the festivalId
         }
       } else {
-        print('User ID or access token not found in shared preferences.');
+        print('User ID not found in shared preferences.');
       }
     } catch (e) {
       print('Error fetching user data: $e');
@@ -59,29 +45,10 @@ class _FestivalPageState extends State<FestivalPage> {
 
   Future<void> _fetchProducts() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('access_token');
-
-      if (accessToken != null) {
-        final response = await http.get(
-          Uri.parse('http://114.204.195.233/festivalProducts'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer $accessToken',
-          },
-        );
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          setState(() {
-            products = data;
-          });
-        } else {
-          print('Failed to load products. Status code: ${response.statusCode}');
-        }
-      } else {
-        print('Access token not found in shared preferences.');
-      }
+      final data = await FestivalApi.fetchProducts(); // FestivalApi 사용
+      setState(() {
+        products = data;
+      });
     } catch (e) {
       print('Error fetching products: $e');
     }
@@ -99,7 +66,12 @@ class _FestivalPageState extends State<FestivalPage> {
 
   Future<void> _logout() async {
     try {
-      await ApiService.logout(context);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } catch (e) {
       print('Error logging out: $e');
       ScaffoldMessenger.of(context).showSnackBar(

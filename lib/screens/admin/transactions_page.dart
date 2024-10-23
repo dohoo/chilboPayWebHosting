@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:intl/intl.dart';
-import '../../services/api_service.dart';
+import '../../services/admin_api.dart'; // AdminApi import
 
 class TransactionsPage extends StatefulWidget {
   @override
@@ -21,29 +19,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Future<void> _fetchTransactions() async {
     try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/transactions'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          transactions = data;
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Failed to load transactions: ${response.statusCode} - ${response.body}';
-        });
-        print('Error: ${response.statusCode} - ${response.body}');
-      }
+      final data = await AdminApi.fetchTransactions(); // AdminApi 사용
+      setState(() {
+        transactions = data;
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Error: $e';

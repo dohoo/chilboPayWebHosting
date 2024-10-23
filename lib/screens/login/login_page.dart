@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'signup_page.dart';
 import '../admin/admin_page.dart';
 import '../user/user_page.dart';
 import '../festival/festival_page.dart'; // Import the festival page
-import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../services/login_api.dart'; // Import LoginApi
 
 class LoginPage extends StatefulWidget {
   @override
@@ -20,85 +18,34 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
+    _checkLoginStatus();  // 앱 시작 시 로그인 상태 확인
   }
 
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? accessToken = prefs.getString('access_token');
-    String? refreshToken = prefs.getString('refresh_token');
+    String? role = prefs.getString('role');  // 로컬에 저장된 역할 확인
 
-    if (accessToken != null && refreshToken != null) {
-      if (await _isTokenExpired(accessToken)) {
-        await _refreshToken();
-      } else {
-        _navigateToRolePage(prefs.getString('role') ?? '');
-      }
-    }
-  }
-
-  Future<bool> _isTokenExpired(String token) async {
-    return JwtDecoder.isExpired(token);
-  }
-
-  Future<void> _refreshToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? refreshToken = prefs.getString('refresh_token');
-
-    if (refreshToken != null) {
-      final response = await http.post(
-        Uri.parse('http://114.204.195.233/token'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'token': refreshToken,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String newAccessToken = data['accessToken'];
-        await prefs.setString('access_token', newAccessToken);
-        _navigateToRolePage(prefs.getString('role') ?? '');
-      } else {
-        await prefs.remove('access_token');
-        await prefs.remove('refresh_token');
-      }
+    if (role != null) {
+      _navigateToRolePage(role);  // 이미 로그인된 경우 해당 역할 페이지로 이동
     }
   }
 
   Future<void> _login() async {
     try {
-      final response = await http.post(
-        Uri.parse('http://114.204.195.233/login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'username': _usernameController.text,
-          'password': _passwordController.text,
-        }),
+      final data = await LoginApi.login(  // LoginApi 사용
+        _usernameController.text,
+        _passwordController.text,
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access_token', data['token']);
-        await prefs.setString('refresh_token', data['refreshToken']);
-        await prefs.setString('role', data['role']);
-        await prefs.setInt('userId', data['id']);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('role', data['role']);  // 로그인 후 역할 저장
+      await prefs.setInt('userId', data['id']);  // 로그인 후 사용자 ID 저장
 
-        _navigateToRolePage(data['role']);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: Invalid credentials')),
-        );
-      }
+      _navigateToRolePage(data['role']);
     } catch (e) {
       print('An error occurred: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred')),
+        SnackBar(content: Text('Login failed: $e')),
       );
     }
   }
@@ -112,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
     } else if (role == 'festival') {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FestivalPage()), // Navigate to FestivalPage
+        MaterialPageRoute(builder: (context) => FestivalPage()),  // Navigate to FestivalPage
       );
     } else {
       Navigator.pushReplacement(

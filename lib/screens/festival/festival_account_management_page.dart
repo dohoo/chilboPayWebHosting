@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../../services/festival_api.dart'; // FestivalApi import
 
 class FestivalAccountManagementPage extends StatefulWidget {
   @override
@@ -17,104 +16,101 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
   }
 
   Future<void> fetchFestivalAccounts() async {
-    final response = await http.get(Uri.parse('http://114.204.195.233/festivalAccounts'));
-    if (response.statusCode == 200) {
+    try {
+      final accounts = await FestivalApi.fetchFestivalAccounts(); // FestivalApi 사용
       setState(() {
-        festivalAccounts = json.decode(response.body);
+        festivalAccounts = accounts;
       });
-    } else {
-      // Error handling
+    } catch (e) {
+      print('Error fetching festival accounts: $e');
     }
   }
 
   Future<void> createFestivalAccount(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('http://114.204.195.233/signup'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'username': username,
-        'password': password,
-        'role': 'festival',
-      }),
-    );
-
-    if (response.statusCode == 201) {
+    try {
+      await FestivalApi.createFestivalAccount(username, password); // FestivalApi 사용
       fetchFestivalAccounts();
-    } else {
-      // Error handling
+    } catch (e) {
+      print('Error creating festival account: $e');
     }
   }
 
   Future<void> updateFestivalAccount(int id, String username, String password) async {
-    final response = await http.put(
-      Uri.parse('http://114.204.195.233/user/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'username': username,
-        'password': password,
-      }),
-    );
-
-    if (response.statusCode == 200) {
+    try {
+      await FestivalApi.updateFestivalAccount(id, username, password); // FestivalApi 사용
       fetchFestivalAccounts();
-    } else {
-      // Error handling
+    } catch (e) {
+      print('Error updating festival account: $e');
     }
   }
 
   Future<void> addFestivalProduct(int festivalId, String name, double price) async {
-    final response = await http.post(
-      Uri.parse('http://114.204.195.233/festivalProducts'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'festivalId': festivalId,
-        'name': name,
-        'price': price,
-      }),
-    );
-
-    if (response.statusCode == 201) {
-      // Successfully added the product
-    } else {
-      // Error handling
+    try {
+      await FestivalApi.addFestivalProduct(festivalId, name, price); // FestivalApi 사용
+    } catch (e) {
+      print('Error adding festival product: $e');
     }
   }
 
   Future<void> updateFestivalProduct(int id, String name, double price) async {
-    final response = await http.put(
-      Uri.parse('http://114.204.195.233/festivalProducts/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'name': name,
-        'price': price,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      // Successfully updated the product
-    } else {
-      // Error handling
+    try {
+      await FestivalApi.updateFestivalProduct(id, name, price); // FestivalApi 사용
+    } catch (e) {
+      print('Error updating festival product: $e');
     }
   }
 
   Future<List<dynamic>> fetchFestivalProducts(int festivalId) async {
-    final response = await http.get(Uri.parse('http://114.204.195.233/festivalProducts?festivalId=$festivalId'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      // Print the response body for debugging purposes
-      print('Failed to load products: ${response.body}');
-      // Error handling
-      throw Exception('Failed to load products');
+    try {
+      return await FestivalApi.fetchFestivalProducts(festivalId); // FestivalApi 사용
+    } catch (e) {
+      print('Error fetching festival products: $e');
+      return [];
     }
+  }
+
+  // Add missing _showEditFestivalAccountDialog method
+  void _showEditFestivalAccountDialog(int id, String currentUsername, String currentPassword) {
+    final usernameController = TextEditingController(text: currentUsername);
+    final passwordController = TextEditingController(text: currentPassword);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Festival Account'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(labelText: 'Username'),
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Update'),
+              onPressed: () {
+                updateFestivalAccount(id, usernameController.text, passwordController.text);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showAddFestivalAccountDialog() {
@@ -160,47 +156,61 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
     );
   }
 
-  void _showEditFestivalAccountDialog(int id, String currentUsername, String currentPassword) {
-    final usernameController = TextEditingController(text: currentUsername);
-    final passwordController = TextEditingController(text: currentPassword);
+  void _showFestivalProductsDialog(int festivalId) async {
+    try {
+      List<dynamic> products = await fetchFestivalProducts(festivalId);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Edit Festival Account'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Festival Products'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return ListTile(
+                      title: Text(product['name']),
+                      subtitle: Text(product['price'].toString()),
+                      trailing: IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          _showEditProductDialog(
+                            product['id'],
+                            product['name'],
+                            product['price'],
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
+              ElevatedButton(
+                child: Text('Add Product'),
+                onPressed: () {
+                  _showAddProductDialog(festivalId);
+                },
               ),
             ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text('Update'),
-              onPressed: () {
-                updateFestivalAccount(id, usernameController.text, passwordController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _showAddProductDialog(int festivalId) {
@@ -295,64 +305,6 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
         );
       },
     );
-  }
-
-  void _showFestivalProductsDialog(int festivalId) async {
-    try {
-      List<dynamic> products = await fetchFestivalProducts(festivalId);
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Festival Products'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return ListTile(
-                      title: Text(product['name']),
-                      subtitle: Text(product['price'].toString()),
-                      trailing: IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          _showEditProductDialog(
-                            product['id'],
-                            product['name'],
-                            product['price'],
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Close'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              ElevatedButton(
-                child: Text('Add Product'),
-                onPressed: () {
-                  _showAddProductDialog(festivalId);
-                },
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      print(e);
-      // Display an error dialog or message
-    }
   }
 
   @override

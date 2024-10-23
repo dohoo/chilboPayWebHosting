@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:intl/intl.dart';
-import '../../services/api_service.dart';
+import '../../services/user_api.dart';
+import '../login/login_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -22,40 +21,30 @@ class _HomePageState extends State<HomePage> {
     _fetchTransactions();
   }
 
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+
   Future<void> _fetchUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('userId');
 
     if (userId == null) {
-      await ApiService.logout(context);
+      _logout();
       return;
     }
 
     try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/user/$userId'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          username = data['username'];
-          money = (data['money'] as num).toInt(); // Convert to int
-        });
-      } else {
-        print('Failed to load user data: ${response.statusCode} - ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load user data')),
-        );
-      }
+      final userData = await UserApi.fetchUserData(userId);
+      setState(() {
+        username = userData['username'];
+        money = (userData['money'] as num).toInt(); // Convert to int
+      });
     } catch (e) {
       print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,34 +58,15 @@ class _HomePageState extends State<HomePage> {
     final userId = prefs.getInt('userId');
 
     if (userId == null) {
-      await ApiService.logout(context);
+      _logout();
       return;
     }
 
     try {
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.get(
-            Uri.parse('http://114.204.195.233/transactions/$userId'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            },
-          );
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          transactions = data;
-        });
-      } else {
-        print('Failed to load transactions: ${response.statusCode} - ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load transactions')),
-        );
-      }
+      final transactionData = await UserApi.fetchTransactions(userId);
+      setState(() {
+        transactions = transactionData;
+      });
     } catch (e) {
       print('Error fetching transactions: $e');
       ScaffoldMessenger.of(context).showSnackBar(

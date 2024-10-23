@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../../services/api_service.dart';
+import '../../services/user_api.dart'; // ApiService 대신 UserApi import
 
 class NfcRegisterPage extends StatefulWidget {
   @override
@@ -18,42 +16,27 @@ class _NfcRegisterPageState extends State<NfcRegisterPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('userId');
 
+      if (userId == null) {
+        setState(() {
+          message = 'User ID not found. Please log in again.';
+        });
+        return;
+      }
+
       // Start NFC session
       NFCTag tag = await FlutterNfcKit.poll();
       String cardId = tag.id;
 
-      final response = await ApiService.makeAuthenticatedRequest(
-        context,
-            (accessToken) {
-          return http.post(
-            Uri.parse('http://114.204.195.233/register-nfc'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Authorization': 'Bearer $accessToken',
-            },
-            body: jsonEncode(<String, dynamic>{
-              'userId': userId,
-              'cardId': cardId,
-            }),
-          );
-        },
-      );
+      // UserApi를 통해 NFC 카드 등록
+      final result = await UserApi.registerNfcCard(userId, cardId);
 
-      if (response.statusCode == 201) {
-        setState(() {
-          message = 'NFC card registered successfully';
-        });
-      } else {
-        final data = jsonDecode(response.body);
-        setState(() {
-          message = 'Failed to register NFC card: ${data['message']}';
-        });
-      }
+      setState(() {
+        message = result['message'];
+      });
     } catch (e) {
       setState(() {
         message = 'Failed to register NFC card: $e';
       });
-      // Do not logout immediately on error, as it might be a temporary issue
     } finally {
       await FlutterNfcKit.finish();
     }

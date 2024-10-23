@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-import '../../services/api_service.dart';
+import '../../services/admin_api.dart'; // ApiService 대신 AdminApi import
 import 'nfc_payment_page.dart';
 import '../no_negative_number_formatter.dart'; // Import the formatter
 
@@ -21,7 +21,7 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
 
   Future<void> _fetchProducts() async {
     try {
-      final data = await ApiService.fetchProducts(context); // Pass context
+      final data = await AdminApi.fetchProducts(); // AdminApi 사용
       setState(() {
         products = data;
       });
@@ -72,9 +72,9 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
                 final int price = int.parse(_priceController.text); // Convert to int
                 try {
                   if (product == null) {
-                    await ApiService.addProduct(context, _nameController.text, price.toDouble()); // Pass context
+                    await AdminApi.addProduct(_nameController.text, price.toDouble()); // AdminApi 사용
                   } else {
-                    await ApiService.updateProduct(context, product['id'], _nameController.text, price.toDouble()); // Pass context
+                    await AdminApi.updateProduct(product['id'], _nameController.text, price.toDouble()); // AdminApi 사용
                   }
                   _fetchProducts();
                   Navigator.of(context).pop();
@@ -91,7 +91,7 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
               TextButton(
                 onPressed: () async {
                   try {
-                    await ApiService.deleteProduct(context, product['id']); // Pass context
+                    await AdminApi.deleteProduct(product['id']); // AdminApi 사용
                     _fetchProducts();
                     Navigator.of(context).pop();
                   } catch (e) {

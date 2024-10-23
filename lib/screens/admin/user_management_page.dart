@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../services/api_service.dart';
+import '../../services/admin_api.dart'; // AdminApi import
 import '../no_negative_number_formatter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../login/login_page.dart';
 
 class UserManagementPage extends StatefulWidget {
   @override
@@ -19,7 +21,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
   Future<void> _fetchUsers() async {
     try {
-      final data = await ApiService.fetchUsers(context);
+      final data = await AdminApi.fetchUsers(); // AdminApi 사용
       setState(() {
         users = data;
       });
@@ -28,7 +30,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load users: $e')),
       );
-      await ApiService.logout(context);
+      await _logout();
     }
   }
 
@@ -68,7 +70,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             ),
             TextButton(
               onPressed: () async {
-                await ApiService.updateUser(context, user['id'], _nameController.text, int.parse(_moneyController.text));
+                await AdminApi.updateUser(user['id'], _nameController.text, int.parse(_moneyController.text)); // AdminApi 사용
                 _fetchUsers();
                 Navigator.of(context).pop();
               },
@@ -76,7 +78,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             ),
             TextButton(
               onPressed: () async {
-                await ApiService.deleteUser(context, user['id']);
+                await AdminApi.deleteUser(user['id']); // AdminApi 사용
                 _fetchUsers();
                 Navigator.of(context).pop();
               },
@@ -85,7 +87,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             if (user['status'] == 'active')
               TextButton(
                 onPressed: () async {
-                  await ApiService.suspendUser(context, user['id']);
+                  await AdminApi.suspendUser(user['id']); // AdminApi 사용
                   _fetchUsers();
                   Navigator.of(context).pop();
                 },
@@ -94,7 +96,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             if (user['status'] == 'suspended')
               TextButton(
                 onPressed: () async {
-                  await ApiService.unsuspendUser(context, user['id']);
+                  await AdminApi.unsuspendUser(user['id']); // AdminApi 사용
                   _fetchUsers();
                   Navigator.of(context).pop();
                 },
@@ -108,7 +110,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
   Future<void> _logout() async {
     try {
-      await ApiService.logout(context);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } catch (e) {
       print('Error logging out: $e');
       ScaffoldMessenger.of(context).showSnackBar(
