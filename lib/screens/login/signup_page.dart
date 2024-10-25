@@ -65,8 +65,10 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF2F4F0),
       appBar: AppBar(
-        title: Text('Sign Up'),
+        backgroundColor: Color(0xFFF2F4F0),
+        title: Text('회원가입'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -100,8 +102,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 GestureDetector(
                   onTap: _navigateToTermsPage,
                   child: Text(
-                    'I accept the terms and conditions',
-                    style: TextStyle(decoration: TextDecoration.underline),
+                    '이용약관에 동의합니다(필수)',
+                    style: TextStyle(
+                      //decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'SUIT-ExtraBold',
+                      fontSize: 15.0,
+                      color: Color(0xFF3C3C3C),
+                    ),
                   ),
                 ),
               ],

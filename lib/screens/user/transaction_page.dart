@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter/services.dart';
-import '../no_negative_number_formatter.dart';
+import '../../services/user_api.dart'; // UserApi 클래스 import
 
 class TransactionPage extends StatefulWidget {
   @override
@@ -11,113 +8,84 @@ class TransactionPage extends StatefulWidget {
 }
 
 class _TransactionPageState extends State<TransactionPage> {
-  final TextEditingController _receiverController = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
+  List transactions = [];
+  int itemsToShow = 10; // 초기 표시 개수
 
-  Future<void> _sendMoney() async {
+  @override
+  void initState() {
+    super.initState();
+    _fetchTransactions();
+  }
+
+  Future<void> _fetchTransactions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final senderId = prefs.getInt('userId');
-    final receiverUsername = _receiverController.text;
-    final amount = int.parse(_amountController.text);
+    final userId = prefs.getInt('userId');
+
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User ID not found')),
+      );
+      return;
+    }
 
     try {
-      // Fetch sender information
-      final senderResponse = await http.get(
-        Uri.parse('http://114.204.195.233/user/$senderId'),
-      );
-
-      if (senderResponse.statusCode != 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sender not found')),
-        );
-        return;
-      }
-
-      final senderData = jsonDecode(senderResponse.body);
-      if (senderData['status'] == 'suspended') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Your account is suspended')),
-        );
-        return;
-      }
-
-      // Fetch receiver information
-      final receiverResponse = await http.get(
-        Uri.parse('http://114.204.195.233/user/by-username/$receiverUsername'),
-      );
-
-      if (receiverResponse.statusCode != 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Receiver not found')),
-        );
-        return;
-      }
-
-      final receiverData = jsonDecode(receiverResponse.body);
-      final receiverId = receiverData['id'];
-
-      // Perform the transaction
-      final response = await http.post(
-        Uri.parse('http://114.204.195.233/transaction'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'senderId': senderId,
-          'receiverId': receiverId,
-          'amount': amount.toDouble(),
-        }),
-      );
-
-      print('Server response: ${response.body}');
-
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transaction successful')),
-        );
-        _receiverController.clear();
-        _amountController.clear();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transaction failed')),
-        );
-      }
+      final data = await UserApi.fetchTransactions(userId);
+      setState(() {
+        transactions = data;
+      });
     } catch (e) {
-      print('An error occurred: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred')),
+        SnackBar(content: Text('Failed to load transactions: $e')),
       );
     }
+  }
+
+  void _loadMore() {
+    setState(() {
+      itemsToShow += 10; // 표시 개수를 10개씩 증가
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transaction Page'),
+        title: Text('Transaction History'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _receiverController,
-              decoration: InputDecoration(labelText: 'Receiver Username'),
+          children: [
+            Expanded(
+              child: transactions.isEmpty
+                  ? Center(child: Text('No transaction history available'))
+                  : ListView.builder(
+                itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
+                itemBuilder: (context, index) {
+                  final transaction = transactions[index];
+                  final String sender = transaction['sender'];
+                  final String receiver = transaction['receiver'];
+                  final double amount = transaction['amount'];
+                  final String date = transaction['date'];
+
+                  return ListTile(
+                    title: Text('$sender → $receiver'),
+                    subtitle: Text(date),
+                    trailing: Text(
+                      '${amount.toStringAsFixed(2)} P',
+                      style: TextStyle(
+                        color: amount < 0 ? Colors.red : Colors.green,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(labelText: 'Amount'),
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-                NoNegativeNumberFormatter(),
-              ],
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _sendMoney,
-              child: Text('Send Money'),
-            ),
+            if (itemsToShow < transactions.length)
+              ElevatedButton(
+                onPressed: _loadMore,
+                child: Text('Load More'),
+              ),
           ],
         ),
       ),

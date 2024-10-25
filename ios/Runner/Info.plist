@@ -10,6 +10,8 @@
     <array>
         <string>NDEF</string>
     </array>
+    <key>NSCameraUsageDescription</key>
+    <string>This app requires access to the camera for scanning QR codes.</string>
     <key>NFCReaderUsageDescription</key>
     <string>We need access to NFC to read/write tags.</string>
 	<key>CFBundleDevelopmentRegion</key>

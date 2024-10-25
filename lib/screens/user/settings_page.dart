@@ -4,6 +4,7 @@ import '../../services/user_api.dart';
 import '../login/login_page.dart';
 import 'nfc_register_page.dart';
 import 'nfc_unregister_page.dart';
+import '../login/terms_page.dart'; // TermsPage import
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -253,55 +254,64 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings Page'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _showLogoutConfirmationDialog,
-          ),
-        ],
+        title: Text('Settings'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            ListTile(
-              title: Text('Username'),
-              subtitle: Text(username),
+            // 상단 이름 섹션
+            Text(
+              '$username님',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+            Divider(thickness: 1, color: Colors.grey),
+            // NFC 카드 등록 / 해지
+            ElevatedButton(
+              onPressed: isSuspended
+                  ? _showSuspendedMessage
+                  : () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => nfcCardId.isEmpty
+                        ? NfcRegisterPage()
+                        : NfcUnregisterPage(),
+                  ),
+                );
+              },
+              child: Text(nfcCardId.isEmpty ? '카드 연동' : '카드 연동 해지'),
+            ),
+            Divider(thickness: 1, color: Colors.grey),
+            // 계정 관리 섹션
             ElevatedButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showUpdateUsernameDialog,
-              child: Text('Update Username'),
+              child: Text('아이디 변경'),
             ),
             ElevatedButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showUpdatePasswordDialog,
-              child: Text('Update Password'),
+              child: Text('비밀번호 변경'),
             ),
+            Divider(thickness: 1, color: Colors.grey),
+            // 개인정보 처리 방침
             ElevatedButton(
-              onPressed: isSuspended ? _showSuspendedMessage : () {
+              onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => NfcRegisterPage()),
+                  MaterialPageRoute(builder: (context) => TermsPage()),
                 );
               },
-              child: Text('Register NFC Card'),
+              child: Text('개인정보 처리 방침'),
             ),
-            ElevatedButton(
-              onPressed: isSuspended ? _showSuspendedMessage : () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NfcUnregisterPage()),
-                );
-              },
-              child: Text('Unregister NFC Card'),
-            ),
+            // 기타 설정 섹션
             ElevatedButton(
               onPressed: _showLogoutConfirmationDialog,
-              child: Text('Logout'),
+              child: Text('로그아웃'),
             ),
             ElevatedButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showDeleteAccountConfirmationDialog,
-              child: Text('Delete Account'),
+              child: Text('탈퇴하기'),
             ),
           ],
         ),

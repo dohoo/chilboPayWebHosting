@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import '../../services/admin_api.dart'; // ApiService 대신 AdminApi import
-import 'nfc_payment_page.dart';
+import 'payment_selection_page.dart'; // PaymentSelectionPage import
 import '../no_negative_number_formatter.dart'; // Import the formatter
 
 class CardPaymentPage extends StatefulWidget {
@@ -110,11 +109,11 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
   }
 
   Future<void> _setProductAndNavigate(int productId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('productId', productId);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => NfcPaymentPage()),
+      MaterialPageRoute(
+        builder: (context) => PaymentSelectionPage(productId: productId), // 선택 화면으로 이동
+      ),
     );
   }
 
