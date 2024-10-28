@@ -14,6 +14,9 @@ allprojects {
         google()
         mavenCentral()
     }
+    tasks.withType(JavaCompile) {
+        options.release = 17 // Set to your desired Java version (1.8 or 17)
+    }
 }
 
 rootProject.buildDir = '../build'
