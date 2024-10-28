@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../services/user_api.dart'; // UserApi 클래스 import
+import '../../services/user_api.dart';
 
 class TransactionPage extends StatefulWidget {
   @override
@@ -65,8 +65,15 @@ class _TransactionPageState extends State<TransactionPage> {
                   final transaction = transactions[index];
                   final String sender = transaction['sender'];
                   final String receiver = transaction['receiver'];
-                  final double amount = transaction['amount'];
                   final String date = transaction['date'];
+
+                  // amount를 안전하게 double로 변환
+                  double amount;
+                  try {
+                    amount = double.parse(transaction['amount'].toString());
+                  } catch (e) {
+                    amount = 0.0; // 변환 실패 시 기본값 사용
+                  }
 
                   return ListTile(
                     title: Text('$sender → $receiver'),

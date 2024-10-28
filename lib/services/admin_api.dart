@@ -131,17 +131,32 @@ class AdminApi {
   }
 
   // Update user
-  static Future<http.Response> updateUser(int id, String username, int money) async {
-    return await http.put(
-      Uri.parse('$baseUrl/user/$id'),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'username': username,
-        'money': money,
-      }),
-    );
+  static Future<http.Response> updateUser(int id, String username, int money, {String? password, String? status}) async {
+    final Map<String, dynamic> payload = {
+      'username': username,
+      'money': money,
+    };
+
+    if (password != null) {
+      payload['password'] = password;
+    }
+    if (status != null) {
+      payload['status'] = status;
+    }
+
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/user/$id'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(payload),
+      );
+      return response;
+    } catch (e) {
+      print('Error in updateUser: $e');
+      rethrow;
+    }
   }
 
   // Delete user

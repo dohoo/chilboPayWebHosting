@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../services/admin_api.dart'; // AdminApi import
+import '../../services/admin_api.dart';
 import '../no_negative_number_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../login/login_page.dart';
@@ -12,6 +12,9 @@ class UserManagementPage extends StatefulWidget {
 
 class _UserManagementPageState extends State<UserManagementPage> {
   List users = [];
+  List displayedUsers = [];
+  int displayedCount = 10; // 초기 로드 개수
+  String _selectedRole = 'user'; // 'user' or 'festival'
 
   @override
   void initState() {
@@ -21,9 +24,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
   Future<void> _fetchUsers() async {
     try {
-      final data = await AdminApi.fetchUsers(); // AdminApi 사용
+      final data = await AdminApi.fetchUsers();
       setState(() {
         users = data;
+        displayedUsers = users.take(displayedCount).toList(); // 첫 10개만 표시
       });
     } catch (e) {
       print('Error fetching users: $e');
@@ -37,91 +41,141 @@ class _UserManagementPageState extends State<UserManagementPage> {
   void _showUserOptionsDialog(Map<String, dynamic> user) {
     final TextEditingController _nameController = TextEditingController(text: user['username']);
     final TextEditingController _moneyController = TextEditingController(text: user['money'].toString());
+    final TextEditingController _passwordController = TextEditingController();
+    bool isSuspended = user['status'] == 'suspended';
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('User Options'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Username'),
-              ),
-              TextField(
-                controller: _moneyController,
-                decoration: InputDecoration(labelText: 'Money'),
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                  NoNegativeNumberFormatter(),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Manage Account: ${user['username']}'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildManagementField('Username', _nameController, 'Edit username', true),
+                  _buildManagementField('Money', _moneyController, 'Edit point', true),
+                  _buildManagementField('Password', _passwordController, 'Enter new password', true, obscureText: true),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Account Status'),
+                      Switch(
+                        value: !isSuspended,
+                        onChanged: (value) {
+                          setState(() {
+                            isSuspended = !value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => _confirmDeleteUser(user['id']),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: Text('Delete Account'),
+                  ),
                 ],
               ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await AdminApi.updateUser(user['id'], _nameController.text, int.parse(_moneyController.text)); // AdminApi 사용
-                _fetchUsers();
-                Navigator.of(context).pop();
-              },
-              child: Text('Update'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await AdminApi.deleteUser(user['id']); // AdminApi 사용
-                _fetchUsers();
-                Navigator.of(context).pop();
-              },
-              child: Text('Delete'),
-            ),
-            if (user['status'] == 'active')
-              TextButton(
-                onPressed: () async {
-                  await AdminApi.suspendUser(user['id']); // AdminApi 사용
-                  _fetchUsers();
-                  Navigator.of(context).pop();
-                },
-                child: Text('Suspend'),
-              ),
-            if (user['status'] == 'suspended')
-              TextButton(
-                onPressed: () async {
-                  await AdminApi.unsuspendUser(user['id']); // AdminApi 사용
-                  _fetchUsers();
-                  Navigator.of(context).pop();
-                },
-                child: Text('Unsuspend'),
-              ),
-          ],
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => _confirmSaveChanges(user['id'], _nameController.text, int.parse(_moneyController.text), _passwordController.text, isSuspended),
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> _logout() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    } catch (e) {
-      print('Error logging out: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to logout')),
-      );
-    }
+  Future<void> _confirmDeleteUser(int userId) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Account'),
+        content: Text('Are you sure you want to delete this account?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await AdminApi.deleteUser(userId);
+              _fetchUsers();
+              Navigator.of(context).pop(); // Close confirmation dialog
+              Navigator.of(context).pop(); // Close options dialog
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmSaveChanges(int userId, String username, int money, String password, bool isSuspended) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Save Changes'),
+        content: Text('Are you sure you want to save the changes?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+
+              // 사용자 정보 업데이트 요청
+              await AdminApi.updateUser(
+                userId,
+                username,
+                money,
+                password: password.isNotEmpty ? password : null,
+                status: isSuspended ? 'suspended' : 'active',
+              );
+
+              _fetchUsers(); // 변경 사항 반영을 위해 사용자 목록 다시 로드
+              Navigator.of(context).pop(); // 옵션 다이얼로그 닫기
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildManagementField(String label, TextEditingController controller, String hintText, bool isEditable,
+      {bool obscureText = false}) {
+    return Row(
+      children: [
+        Expanded(child: Text(label)),
+        Expanded(
+          flex: 2,
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: hintText),
+            readOnly: !isEditable,
+            obscureText: obscureText,
+            keyboardType: isEditable ? TextInputType.number : TextInputType.text,
+            inputFormatters: isEditable ? [FilteringTextInputFormatter.digitsOnly] : null, // 숫자 입력 제한
+          ),
+        ),
+      ],
+    );
   }
 
   void _showLogoutConfirmationDialog() {
@@ -151,8 +205,33 @@ class _UserManagementPageState extends State<UserManagementPage> {
     );
   }
 
+  Future<void> _logout() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } catch (e) {
+      print('Error logging out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to logout')),
+      );
+    }
+  }
+
+  void _loadMoreUsers() {
+    setState(() {
+      displayedCount += 10; // 10개씩 추가 로드
+      displayedUsers = users.take(displayedCount).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filteredUsers = displayedUsers.where((user) => user['role'] == _selectedRole).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('User Management'),
@@ -163,16 +242,61 @@ class _UserManagementPageState extends State<UserManagementPage> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: users.length,
-        itemBuilder: (context, index) {
-          final user = users[index];
-          return ListTile(
-            title: Text(user['username']),
-            subtitle: Text('Money: ${user['money']} - Status: ${user['status']}'),
-            onTap: () => _showUserOptionsDialog(user),
-          );
-        },
+      body: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedRole = 'user';
+                  });
+                },
+                child: Text('Users', style: TextStyle(color: _selectedRole == 'user' ? Colors.blue : Colors.grey)),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedRole = 'festival';
+                  });
+                },
+                child: Text('Clubs', style: TextStyle(color: _selectedRole == 'festival' ? Colors.blue : Colors.grey)),
+              ),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: filteredUsers.length + 1,
+              itemBuilder: (context, index) {
+                if (index == filteredUsers.length) {
+                  return (displayedCount < users.length)
+                      ? TextButton(
+                    onPressed: _loadMoreUsers,
+                    child: Text("더 보기"),
+                  )
+                      : Container();
+                }
+
+                final user = filteredUsers[index];
+                return ListTile(
+                  title: Text(user['username']),
+                  subtitle: Row(
+                    children: [
+                      Text('${user['money']}p'),
+                      SizedBox(width: 16),
+                      if (user['status'] == 'suspended') Text('정지됨', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: () => _showUserOptionsDialog(user),
+                    child: Text('Manage'),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

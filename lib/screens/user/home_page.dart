@@ -14,7 +14,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String username = '';
   int money = 0;
-  List transactions = [];
   String qrData = '';
   Timer? _timer;
   int remainingTime = 60;
@@ -23,7 +22,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _fetchUserData();
-    _fetchTransactions();
     _startQrTimer();
   }
 
@@ -62,28 +60,6 @@ class _HomePageState extends State<HomePage> {
       print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load user data: $e')),
-      );
-    }
-  }
-
-  Future<void> _fetchTransactions() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('userId');
-
-    if (userId == null) {
-      _logout();
-      return;
-    }
-
-    try {
-      final transactionData = await UserApi.fetchTransactions(userId);
-      setState(() {
-        transactions = transactionData;
-      });
-    } catch (e) {
-      print('Error fetching transactions: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load transactions: $e')),
       );
     }
   }
@@ -135,27 +111,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
-            child: ListView.builder(
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
-                final transaction = transactions[index];
-                final int amount = (double.parse(transaction['amount'].toString())).toInt(); // Convert amount to int
-                return ListTile(
-                  title: Text('${transaction['sender']} -> ${transaction['receiver']}'),
-                  subtitle: Text(DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.parse(transaction['date']))),
-                  trailing: Text(
-                    formatCurrency.format(amount),
-                    style: TextStyle(
-                      color: amount < 0 ? Colors.red : Colors.green,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          // QR 코드 아래 계좌 정보 배치
+          // 거래 내역 대신 계좌 정보만 표시
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(

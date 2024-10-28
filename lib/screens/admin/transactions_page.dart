@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../services/admin_api.dart'; // AdminApi import
+import '../../services/admin_api.dart';
 
 class TransactionsPage extends StatefulWidget {
   @override
@@ -10,6 +10,7 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   List transactions = [];
   String _errorMessage = '';
+  int itemsToShow = 10; // 처음에는 10개만 보여줌
 
   @override
   void initState() {
@@ -19,7 +20,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Future<void> _fetchTransactions() async {
     try {
-      final data = await AdminApi.fetchTransactions(); // AdminApi 사용
+      final data = await AdminApi.fetchTransactions();
       setState(() {
         transactions = data;
       });
@@ -29,6 +30,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
       });
       print('Exception: $e');
     }
+  }
+
+  void _loadMore() {
+    setState(() {
+      itemsToShow += 10; // 더보기 버튼 클릭 시 10개씩 추가 로드
+    });
+  }
+
+  // UTC 시간을 KST로 변환하는 함수
+  DateTime _convertToKST(DateTime utcDateTime) {
+    return utcDateTime.toUtc().add(Duration(hours: 9)); // UTC에 9시간 추가
   }
 
   @override
@@ -42,22 +54,38 @@ class _TransactionsPageState extends State<TransactionsPage> {
       ),
       body: Center(
         child: _errorMessage.isEmpty
-            ? ListView.builder(
-          itemCount: transactions.length,
-          itemBuilder: (context, index) {
-            final transaction = transactions[index];
-            final int amount = (double.parse(transaction['amount'].toString())).toInt(); // Convert amount to int
-            return ListTile(
-              title: Text('${transaction['sender']} -> ${transaction['receiver']}'),
-              subtitle: Text(formatDate.format(DateTime.parse(transaction['date']))),
-              trailing: Text(
-                formatCurrency.format(amount),
-                style: TextStyle(
-                  color: amount < 0 ? Colors.red : Colors.green,
-                ),
+            ? Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
+                itemBuilder: (context, index) {
+                  final transaction = transactions[index];
+                  final int amount = (double.parse(transaction['amount'].toString())).toInt();
+
+                  // UTC 날짜 문자열을 DateTime으로 변환 후 KST로 변환
+                  final DateTime utcDate = DateTime.parse(transaction['date']).toUtc();
+                  final DateTime kstDate = _convertToKST(utcDate);
+
+                  return ListTile(
+                    title: Text('${transaction['sender']} -> ${transaction['receiver']}'),
+                    subtitle: Text(formatDate.format(kstDate)), // 한국 시간대로 변환된 시간 표시
+                    trailing: Text(
+                      formatCurrency.format(amount),
+                      style: TextStyle(
+                        color: amount < 0 ? Colors.red : Colors.green,
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+            if (itemsToShow < transactions.length) // 더보기 버튼 조건부 렌더링
+              TextButton(
+                onPressed: _loadMore,
+                child: Text("더 보기"),
+              ),
+          ],
         )
             : Text(_errorMessage),
       ),

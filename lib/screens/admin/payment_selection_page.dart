@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'nfc_payment_page.dart';
 import 'qr_payment_page.dart';
 
@@ -44,4 +44,4 @@ class PaymentSelectionPage extends StatelessWidget {
       ),
     );
   }
-}
+}*/

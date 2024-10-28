@@ -4,38 +4,46 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/admin_api.dart'; // AdminApi import
 
 class NfcPaymentPage extends StatefulWidget {
+  final List<Map<String, dynamic>> selectedProducts; // 선택된 상품 목록
+
+  NfcPaymentPage({required this.selectedProducts});
+
   @override
   _NfcPaymentPageState createState() => _NfcPaymentPageState();
 }
 
 class _NfcPaymentPageState extends State<NfcPaymentPage> {
   String message = 'Please tap your NFC card';
+  bool isLoading = false;
 
   Future<void> _payNfcCard() async {
+    setState(() {
+      isLoading = true;
+      message = 'Processing payment for ${widget.selectedProducts.length} products...';
+    });
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final productId = prefs.getInt('productId');
-
-      if (productId == null) {
-        setState(() {
-          message = 'Product ID is not set';
-        });
-        return;
-      }
-
-      // Start NFC session
       NFCTag tag = await FlutterNfcKit.poll();
       String cardId = tag.id;
 
-      // Fetch userId using cardId
       final userData = await AdminApi.fetchUserByCard(cardId);
       final userId = userData['userId'];
 
-      // Proceed with payment
-      final result = await AdminApi.processPayment(userId, productId);
+      for (var product in widget.selectedProducts) {
+        final int productId = product['id'];
+        final int count = product['count'];
 
+        for (int i = 0; i < count; i++) {
+          final result = await AdminApi.processPayment(userId, productId);
+          if (!result['success']) {
+            setState(() {
+              message = result['message'];
+            });
+            break;
+          }
+        }
+      }
       setState(() {
-        message = result['message'];
+        message = 'Payment completed successfully!';
       });
     } catch (e) {
       setState(() {
@@ -43,6 +51,9 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
       });
     } finally {
       await FlutterNfcKit.finish();
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -59,7 +70,9 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
         title: Text('Payment NFC Card'),
       ),
       body: Center(
-        child: Padding(
+        child: isLoading
+            ? CircularProgressIndicator()
+            : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(message),
         ),

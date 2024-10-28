@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../../services/admin_api.dart'; // ApiService 대신 AdminApi import
-import 'payment_selection_page.dart'; // PaymentSelectionPage import
-import '../no_negative_number_formatter.dart'; // Import the formatter
+import '../../services/admin_api.dart';
+import 'nfc_payment_page.dart';
+import 'qr_payment_page.dart';
+import 'product_settings_page.dart';
 
 class CardPaymentPage extends StatefulWidget {
   @override
@@ -11,6 +11,8 @@ class CardPaymentPage extends StatefulWidget {
 
 class _CardPaymentPageState extends State<CardPaymentPage> {
   List products = [];
+  Map<int, int> productCounts = {};
+  int totalAmount = 0;
 
   @override
   void initState() {
@@ -20,102 +22,91 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
 
   Future<void> _fetchProducts() async {
     try {
-      final data = await AdminApi.fetchProducts(); // AdminApi 사용
+      final data = await AdminApi.fetchProducts();
       setState(() {
         products = data;
+        productCounts = {for (var product in data) product['id']: 0};
+        _calculateTotalAmount();
       });
     } catch (e) {
-      print(e);
+      print('Error fetching products: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load products')),
       );
     }
   }
 
-  void _showProductDialog({Map<String, dynamic>? product}) {
-    final TextEditingController _nameController = TextEditingController(text: product?['name'] ?? '');
-    final TextEditingController _priceController = TextEditingController(text: product?['price']?.toString() ?? '');
+  void _calculateTotalAmount() {
+    int total = 0;
+    for (var product in products) {
+      final productId = product['id'];
+      final int productPrice = (product['price'] as num).toInt();
+      final int count = (productCounts[productId] ?? 0).toInt();
+      total += productPrice * count;
+    }
+    setState(() {
+      totalAmount = total;
+    });
+  }
+
+  void _showPaymentMethodDialog() {
+    if (totalAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select at least one product')),
+      );
+      return;
+    }
+
+    final selectedProducts = productCounts.keys
+        .where((id) => (productCounts[id] ?? 0) > 0)
+        .map((id) => {'id': id, 'count': productCounts[id] ?? 0})
+        .toList();
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(product == null ? 'Add Product' : 'Edit Product'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Product Name'),
-              ),
-              TextField(
-                controller: _priceController,
-                decoration: InputDecoration(labelText: 'Price'),
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                  NoNegativeNumberFormatter(), // Add the custom formatter
-                ],
-              ),
-            ],
-          ),
-          actions: <Widget>[
+          title: Text("Choose Payment Method"),
+          content: Text("Select a payment method for this purchase."),
+          actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NfcPaymentPage(selectedProducts: selectedProducts),
+                  ),
+                );
               },
-              child: Text('Cancel'),
+              child: Text("NFC Payment"),
             ),
             TextButton(
-              onPressed: () async {
-                final int price = int.parse(_priceController.text); // Convert to int
-                try {
-                  if (product == null) {
-                    await AdminApi.addProduct(_nameController.text, price.toDouble()); // AdminApi 사용
-                  } else {
-                    await AdminApi.updateProduct(product['id'], _nameController.text, price.toDouble()); // AdminApi 사용
-                  }
-                  _fetchProducts();
-                  Navigator.of(context).pop();
-                } catch (e) {
-                  print('Error updating or adding product: $e');
+              onPressed: () {
+                Navigator.pop(context);
+                final productId = selectedProducts[0]['id'] as int?; // null-safe cast
+                if (productId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QrPaymentPage(productId: productId),
+                    ),
+                  );
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update or add product')),
+                    SnackBar(content: Text('Invalid product ID')),
                   );
                 }
               },
-              child: Text(product == null ? 'Add' : 'Update'),
+              child: Text("QR Payment"),
             ),
-            if (product != null)
-              TextButton(
-                onPressed: () async {
-                  try {
-                    await AdminApi.deleteProduct(product['id']); // AdminApi 사용
-                    _fetchProducts();
-                    Navigator.of(context).pop();
-                  } catch (e) {
-                    print('Error deleting product: $e');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to delete product')),
-                    );
-                  }
-                },
-                child: Text('Delete'),
-              ),
           ],
         );
       },
     );
   }
 
-  Future<void> _setProductAndNavigate(int productId) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PaymentSelectionPage(productId: productId), // 선택 화면으로 이동
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -124,26 +115,80 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
         title: Text('Card Payment'),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _showProductDialog(),
+            icon: Icon(Icons.settings),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductSettingsPage(),
+                ),
+              );
+              _fetchProducts(); // 설정 페이지에서 돌아오면 상품 목록을 새로 고침
+            },
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-          final int price = int.parse(product['price'].toString()); // Convert to int
-          return ListTile(
-            title: Text(product['name']),
-            subtitle: Text('Price: $price'),
-            onTap: () => _setProductAndNavigate(product['id']),
-            trailing: IconButton(
-              icon: Icon(Icons.settings),
-              onPressed: () => _showProductDialog(product: product),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                final productId = product['id'];
+                final productPrice = product['price'] ?? 0;
+                final productCount = productCounts[productId] ?? 0;
+
+                return ListTile(
+                  title: Text(product['name']),
+                  subtitle: Text('Price: $productPrice'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () {
+                          setState(() {
+                            if (productCount > 0) {
+                              productCounts[productId] = productCount - 1;
+                              _calculateTotalAmount();
+                            }
+                          });
+                        },
+                      ),
+                      Text('$productCount'),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            productCounts[productId] = productCount + 1;
+                            _calculateTotalAmount();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  'Total: $totalAmount',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _showPaymentMethodDialog,
+                  child: Text('Proceed to Payment'),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
