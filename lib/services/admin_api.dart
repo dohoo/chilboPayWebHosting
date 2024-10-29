@@ -185,4 +185,43 @@ class AdminApi {
       },
     );
   }
+
+  // Create an account
+  static Future<void> createAccount(String role, String username, String password, int money, List<Map<String, dynamic>> products) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/createAccount'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'role': role,               // accountType을 role로 변경
+        'username': username,
+        'password': password,
+        'points': money,             // money 필드를 points로 변환
+        'products': products,
+      }),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to create account');
+    }
+  }
+
+  // Change password
+  static Future<void> changePassword(String oldPassword, String newPassword) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/changePassword'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to change password');
+    }
+  }
 }

@@ -1,47 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../services/festival_api.dart'; // FestivalApi import
+import '../../services/festival_api.dart';
 
 class FestivalNfcPaymentPage extends StatefulWidget {
+  final int productId;
+  final int festivalId;
+
+  FestivalNfcPaymentPage({required this.productId, required this.festivalId});
+
   @override
   _FestivalNfcPaymentPageState createState() => _FestivalNfcPaymentPageState();
 }
 
 class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
-  String message = 'Please tap your NFC card';
+  String message = 'Tap NFC Card';
 
-  Future<void> _payNfcCard() async {
+  Future<void> _startNfcPayment() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final productId = prefs.getInt('productId');
-      final festivalId = prefs.getInt('festivalId'); // Ensure festivalId is stored in SharedPreferences
-
-      if (productId == null || festivalId == null) {
-        setState(() {
-          message = 'Product ID or Festival ID is not set';
-        });
-        return;
-      }
-
-      // Start NFC session
       NFCTag tag = await FlutterNfcKit.poll();
-      String cardId = tag.id;
+      final userData = await FestivalApi.getUserIdByCard(tag.id);
 
-      // Fetch user information using cardId
-      final userData = await FestivalApi.fetchUserByCard(cardId); // FestivalApi 사용
-      final userId = userData['userId'];
+      // userId를 Map에서 추출하여 int로 할당
+      final int userId = userData['userId'];
 
-      // Proceed with NFC payment
-      final result = await FestivalApi.processNfcPayment(cardId, userId, productId, festivalId); // FestivalApi 사용
+      final result = await FestivalApi.processNfcPayment(userId, widget.productId, widget.festivalId);
 
-      setState(() {
-        message = result['message'];
-      });
+      setState(() => message = result['message']);
     } catch (e) {
-      setState(() {
-        message = 'Failed to pay with NFC card: $e';
-      });
+      setState(() => message = 'Payment failed: $e');
     } finally {
       await FlutterNfcKit.finish();
     }
@@ -50,21 +36,14 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
   @override
   void initState() {
     super.initState();
-    _payNfcCard();
+    _startNfcPayment();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Festival NFC Payment'),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(message),
-        ),
-      ),
+      appBar: AppBar(title: Text('NFC Payment')),
+      body: Center(child: Text(message)),
     );
   }
 }

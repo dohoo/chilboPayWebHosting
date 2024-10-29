@@ -16,7 +16,7 @@ class _AdminPageState extends State<AdminPage> {
     UserManagementPage(),
     CardPaymentPage(),
     StatisticsPage(),
-    SettingsPage(), // 추가
+    AdminSettingsPage(), // 추가
   ];
 
   void _onItemTapped(int index) {
@@ -28,28 +28,37 @@ class _AdminPageState extends State<AdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: SafeArea(
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: _widgetOptions,
+        ),
+      ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,  // 모든 아이템을 고정 크기로 표시
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.supervised_user_circle),
+            icon: Icon(Icons.supervised_user_circle, size: 24), // 아이콘 크기 조정
             label: 'User Management',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.payment),
+            icon: Icon(Icons.payment, size: 24), // 아이콘 크기 조정
             label: 'Card Payment',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
+            icon: Icon(Icons.bar_chart, size: 24), // 아이콘 크기 조정
             label: 'Statistics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Icon(Icons.settings, size: 24), // 아이콘 크기 조정
             label: 'Settings',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.grey, // 비선택 상태의 색상 설정
+        selectedFontSize: 12, // 선택된 아이템의 글꼴 크기
+        unselectedFontSize: 10, // 선택되지 않은 아이템의 글꼴 크기
         onTap: _onItemTapped,
       ),
     );

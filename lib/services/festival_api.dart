@@ -100,8 +100,18 @@ class FestivalApi {
     }
   }
 
+  // QR 결제를 처리하는 메서드
+  static Future<Map<String, dynamic>> processQrPayment(int userId, int productId, int festivalId) async {
+    return await _processFestivalPurchase(userId, productId, festivalId);
+  }
+
   // NFC 결제를 처리하는 메서드
-  static Future<Map<String, dynamic>> processNfcPayment(String cardId, int userId, int productId, int festivalId) async {
+  static Future<Map<String, dynamic>> processNfcPayment(int userId, int productId, int festivalId) async {
+    return await _processFestivalPurchase(userId, productId, festivalId);
+  }
+
+  // 공통 결제 로직
+  static Future<Map<String, dynamic>> _processFestivalPurchase(int userId, int productId, int festivalId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/festival-purchase'),
       headers: <String, String>{
@@ -115,10 +125,10 @@ class FestivalApi {
     );
 
     if (response.statusCode == 201) {
-      return {'success': true, 'message': 'NFC card payment successful'};
+      return {'success': true, 'message': 'Payment successful'};
     } else {
       final data = jsonDecode(response.body);
-      return {'success': false, 'message': data['message']};
+      return {'success': false, 'message': data['message'] ?? 'Payment failed'};
     }
   }
 
@@ -169,4 +179,22 @@ class FestivalApi {
       throw Exception('Failed to load products. Status code: ${response.statusCode}');
     }
   }
+
+  // Fetch user information by card ID
+  static Future<Map<String, dynamic>> getUserIdByCard(String cardId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/user/by-card/$cardId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to fetch user information by card ID');
+    }
+  }
+
+
 }
