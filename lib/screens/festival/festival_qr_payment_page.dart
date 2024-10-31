@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../services/festival_api.dart';
+import 'payment_success_page.dart'; // 결제 완료 페이지 import
 
 class FestivalQrPaymentPage extends StatefulWidget {
   final int productId;
@@ -29,22 +30,8 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
     controller.scannedDataStream.listen((scanData) async {
       controller.pauseCamera();
 
-      // QR 데이터 검증
-      final qrData = scanData.code;
-      if (qrData == null || !qrData.contains("_")) {
-        setState(() {
-          message = 'Invalid QR format';
-        });
-        controller.resumeCamera();
-        return;
-      }
-
-      // QR 데이터 구조 분리 및 검증
-      final parts = qrData.split("_");
-      final userId = int.tryParse(parts[0]);
-      final timestamp = int.tryParse(parts[1]);
-
-      if (userId == null || timestamp == null) {
+      final token = scanData.code;
+      if (token == null || token.isEmpty) {
         setState(() {
           message = 'Invalid QR code';
         });
@@ -58,10 +45,18 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
       });
 
       try {
-        final result = await FestivalApi.processQrPayment(userId, widget.productId, widget.festivalId);
-        setState(() {
-          message = result['message'];
-        });
+        final result = await FestivalApi.processQrPaymentWithToken(token, widget.productId);
+        if (result['success']) {
+          // 결제가 성공하면 결제 완료 페이지로 이동
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
+          );
+        } else {
+          setState(() {
+            message = result['message'];
+          });
+        }
       } catch (e) {
         setState(() {
           message = 'Failed to pay with QR code: $e';

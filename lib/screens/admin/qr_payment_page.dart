@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../services/admin_api.dart';
+import 'payment_complete_page.dart'; // 결제 완료 페이지 import
 
 class QrPaymentPage extends StatefulWidget {
-  final int productId;
+  final List<Map<String, dynamic>> selectedProducts;
 
-  QrPaymentPage({required this.productId});
+  QrPaymentPage({required this.selectedProducts});
 
   @override
   _QrPaymentPageState createState() => _QrPaymentPageState();
@@ -28,24 +29,10 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
     controller.scannedDataStream.listen((scanData) async {
       controller.pauseCamera();
 
-      // QR 데이터 파싱
-      final qrData = scanData.code;
-      if (qrData == null || !qrData.contains("_")) {
+      final token = scanData.code;
+      if (token == null) {
         setState(() {
-          message = 'Invalid QR format';
-        });
-        controller.resumeCamera(); // 잘못된 형식이면 다시 카메라 재개
-        return;
-      }
-
-      // QR 데이터 구조 검증
-      final parts = qrData.split("_");
-      final userId = int.tryParse(parts[0]);
-      final timestamp = int.tryParse(parts[1]);
-
-      if (userId == null || timestamp == null) {
-        setState(() {
-          message = 'Invalid QR code';
+          message = 'Invalid QR code.';
         });
         controller.resumeCamera();
         return;
@@ -57,17 +44,41 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
       });
 
       try {
-        final result = await AdminApi.processPayment(userId, widget.productId);
+        for (var product in widget.selectedProducts) {
+          final int productId = product['id'];
+          final int count = product['count'];
+
+          for (int i = 0; i < count; i++) {
+            final result = await AdminApi.processPaymentWithToken(token, productId);
+            if (!result['success']) {
+              setState(() {
+                message = result['message'];
+                isProcessing = false; // 결제 실패 시 로딩 종료
+              });
+              controller.resumeCamera();
+              return; // 결제 실패 시 종료
+            }
+          }
+        }
+
         setState(() {
-          message = result['message'];
+          message = 'Payment completed successfully!';
         });
+
+        // 모든 결제가 완료되면 결제 완료 페이지로 이동
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentCompletePage(),
+          ),
+        );
       } catch (e) {
         setState(() {
           message = 'Failed to pay with QR code: $e';
         });
       } finally {
         setState(() {
-          isProcessing = false;
+          isProcessing = false; // 모든 결제 처리 종료 후 로딩 종료
         });
         controller.resumeCamera();
       }

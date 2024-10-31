@@ -143,25 +143,4 @@ class UserApi {
     }
   }
 
-  // QR 결제 요청
-  static Future<Map<String, dynamic>> processQrPayment(String token, int productId) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/purchaseWithQr'),
-        headers: headers,
-        body: jsonEncode({
-          'token': token,
-          'productId': productId,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to process QR payment');
-      }
-    } catch (e) {
-      throw Exception('Error processing QR payment: $e');
-    }
-  }
 }

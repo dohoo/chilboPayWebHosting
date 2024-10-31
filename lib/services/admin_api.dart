@@ -223,4 +223,22 @@ class AdminApi {
       throw Exception('Failed to change password');
     }
   }
+
+  static Future<Map<String, dynamic>> processPaymentWithToken(String token, int productId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/purchaseWithToken'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'token': token,
+        'productId': productId,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return {'success': true, 'message': 'Payment successful'};
+    } else {
+      final error = jsonDecode(response.body);
+      return {'success': false, 'message': error['message']};
+    }
+  }
 }

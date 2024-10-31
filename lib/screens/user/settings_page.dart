@@ -279,7 +279,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         ? NfcRegisterPage()
                         : NfcUnregisterPage(),
                   ),
-                );
+                ).then((value) {
+                  _fetchUserData(); // NFC 카드 등록/해지 후 사용자 정보 새로고침
+                });
               },
               child: Text(nfcCardId.isEmpty ? '카드 연동' : '카드 연동 해지'),
             ),

@@ -101,8 +101,29 @@ class FestivalApi {
   }
 
   // QR 결제를 처리하는 메서드
-  static Future<Map<String, dynamic>> processQrPayment(int userId, int productId, int festivalId) async {
-    return await _processFestivalPurchase(userId, productId, festivalId);
+  static Future<Map<String, dynamic>> processQrPaymentWithToken(String token, int productId) async {
+    return await _processFestivalPurchaseByToken(token, productId);
+  }
+
+  // 공통 결제 로직 with token
+  static Future<Map<String, dynamic>> _processFestivalPurchaseByToken(String token, int productId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/festivalPurchaseWithToken'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'token': token,
+        'productId': productId,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return {'success': true, 'message': 'Payment successful'};
+    } else {
+      final data = jsonDecode(response.body);
+      return {'success': false, 'message': data['message'] ?? 'Payment failed'};
+    }
   }
 
   // NFC 결제를 처리하는 메서드
@@ -206,5 +227,4 @@ class FestivalApi {
       throw Exception('Failed to load festival products');
     }
   }
-
 }

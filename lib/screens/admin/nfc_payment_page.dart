@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import '../../services/admin_api.dart'; // AdminApi import
+import 'payment_complete_page.dart'; // 결제 완료 페이지 import
 
 class NfcPaymentPage extends StatefulWidget {
   final List<Map<String, dynamic>> selectedProducts;
@@ -40,7 +41,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
           if (!result['success']) {
             setState(() {
               message = result['message'];
-              isLoading = false; // 로딩 종료
+              isLoading = false; // 결제 실패 시 로딩 종료
             });
             return; // 결제 실패 시 종료
           }
@@ -50,6 +51,14 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
       setState(() {
         message = 'Payment completed successfully!';
       });
+
+      // 모든 결제가 완료되면 결제 완료 페이지로 이동
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentCompletePage(),
+        ),
+      );
     } catch (e) {
       setState(() {
         message = 'Failed to pay with NFC card: $e';

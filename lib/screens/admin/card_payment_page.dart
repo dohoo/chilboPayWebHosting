@@ -84,19 +84,12 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                final productId = selectedProducts[0]['id'] as int?; // null-safe cast
-                if (productId != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => QrPaymentPage(productId: productId),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Invalid product ID')),
-                  );
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QrPaymentPage(selectedProducts: selectedProducts),
+                  ),
+                );
               },
               child: Text("QR Payment"),
             ),

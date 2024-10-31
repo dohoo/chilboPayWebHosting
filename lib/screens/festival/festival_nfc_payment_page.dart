@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import '../../services/festival_api.dart';
+import 'payment_success_page.dart'; // 결제 성공 페이지 import
 
 class FestivalNfcPaymentPage extends StatefulWidget {
   final int productId;
@@ -14,13 +15,14 @@ class FestivalNfcPaymentPage extends StatefulWidget {
 
 class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
   String message = 'Tap NFC Card';
-  bool isLoading = false; // 로딩 상태 변수
+  bool isLoading = false;
 
   Future<void> _startNfcPayment() async {
     setState(() {
-      isLoading = true; // 결제 시작 시 로딩 상태 설정
+      isLoading = true;
       message = 'Processing payment...';
     });
+
     try {
       NFCTag tag = await FlutterNfcKit.poll();
       final userData = await FestivalApi.getUserIdByCard(tag.id);
@@ -28,9 +30,17 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
 
       final result = await FestivalApi.processNfcPayment(userId, widget.productId, widget.festivalId);
 
-      setState(() {
-        message = result['message'];
-      });
+      if (result['success']) {
+        // 결제가 성공하면 성공 페이지로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
+        );
+      } else {
+        setState(() {
+          message = result['message'];
+        });
+      }
     } catch (e) {
       setState(() {
         message = 'Payment failed: $e';
@@ -38,7 +48,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
     } finally {
       await FlutterNfcKit.finish(); // NFC 처리 종료
       setState(() {
-        isLoading = false; // 결제 완료 후 로딩 상태 해제
+        isLoading = false;
       });
     }
   }
@@ -46,7 +56,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 1), _startNfcPayment); // 페이지가 열리고 1초 후 NFC 결제 시작
+    Future.delayed(Duration(seconds: 1), _startNfcPayment);
   }
 
   @override
@@ -60,7 +70,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
               ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(), // 로딩 표시
+              CircularProgressIndicator(),
               SizedBox(height: 16),
               Text('Processing payment...'),
             ],
