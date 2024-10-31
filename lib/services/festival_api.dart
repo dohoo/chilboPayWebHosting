@@ -196,5 +196,15 @@ class FestivalApi {
     }
   }
 
+  // 특정 username을 통해 축제 제품 목록 가져오기
+  static Future<List<dynamic>> fetchFestivalProductsByUsername(String username) async {
+    final response = await http.get(Uri.parse('$baseUrl/festival-products/$username'));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load festival products');
+    }
+  }
 
 }

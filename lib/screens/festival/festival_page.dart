@@ -4,6 +4,10 @@ import 'festival_payment_page.dart';
 import 'festival_settings_page.dart';
 
 class FestivalPage extends StatefulWidget {
+  final int id;
+
+  FestivalPage({required this.id});
+
   @override
   _FestivalPageState createState() => _FestivalPageState();
 }
@@ -11,11 +15,17 @@ class FestivalPage extends StatefulWidget {
 class _FestivalPageState extends State<FestivalPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    FestivalManagementPage(),
-    FestivalPaymentPage(),
-    FestivalSettingsPage(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      FestivalManagementPage(id: widget.id),  // id 전달
+      FestivalPaymentPage(),
+      FestivalSettingsPage(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -39,3 +49,4 @@ class _FestivalPageState extends State<FestivalPage> {
     );
   }
 }
+

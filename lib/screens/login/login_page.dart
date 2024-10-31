@@ -40,6 +40,9 @@ class _LoginPageState extends State<LoginPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('role', data['role']);  // 로그인 후 역할 저장
       await prefs.setInt('userId', data['id']);  // 로그인 후 사용자 ID 저장
+      if (data['role'] == 'festival') {
+        await prefs.setInt('festivalId', data['id']);  // festivalId 저장
+      }
 
       _navigateToRolePage(data['role']);
     } catch (e) {
@@ -50,7 +53,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _navigateToRolePage(String role) {
+  void _navigateToRolePage(String role) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int festivalId = prefs.getInt('festivalId') ?? 0;
+
     if (role == 'admin') {
       Navigator.pushReplacement(
         context,
@@ -59,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
     } else if (role == 'festival') {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FestivalPage()),  // Navigate to FestivalPage
+        MaterialPageRoute(builder: (context) => FestivalPage(id: festivalId)),  // FestivalPage에 id 전달
       );
     } else {
       Navigator.pushReplacement(
@@ -103,10 +109,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
 
-            Spacer(
-                flex: 1
-            ),
-
+            Spacer(flex: 1),
             Text(
               '반갑습니다.',
               style: TextStyle(
@@ -115,13 +118,13 @@ class _LoginPageState extends State<LoginPage> {
                 fontSize: 25.0,
               ),
             ),
-            SizedBox(height: 40.0),  // 반갑습니다와 ID 사이 간격 추가
+            SizedBox(height: 40.0),
             Align(
-              alignment: Alignment.center,  // ID와 입력란을 모두 중앙 정렬
+              alignment: Alignment.center,
               child: FractionallySizedBox(
-                widthFactor: 0.8,  // 부모 너비의 80%로 설정
+                widthFactor: 0.8,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,  // 텍스트를 입력란에 맞춰 왼쪽 정렬
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'ID',
@@ -131,12 +134,11 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     TextField(
-                      cursorColor: Colors.black, // 커서 색상 변경
+                      cursorColor: Colors.black,
                       controller: _usernameController,
                       decoration: InputDecoration(
                         labelText: '',
-                        // 만약 hover 상태의 색을 변경하고 싶으면 아래처럼 설정
-                        hoverColor: Colors.black,  // 마우스 hover 시 색상
+                        hoverColor: Colors.black,
                       ),
                     ),
                   ],
@@ -145,13 +147,12 @@ class _LoginPageState extends State<LoginPage> {
             ),
 
             Spacer(flex: 2),
-
             Align(
-              alignment: Alignment.center,  // PASSWORD와 입력란을 모두 중앙 정렬
+              alignment: Alignment.center,
               child: FractionallySizedBox(
-                widthFactor: 0.8,  // 부모 너비의 80%로 설정
+                widthFactor: 0.8,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,  // 텍스트를 입력란에 맞춰 왼쪽 정렬
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'PASSWORD',
@@ -162,10 +163,10 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextField(
                       controller: _passwordController,
-                      cursorColor: Colors.black, // 커서 색상 변경
+                      cursorColor: Colors.black,
                       decoration: InputDecoration(
                         labelText: '',
-                        hoverColor: Colors.black,  // 마우스 hover 시 색상
+                        hoverColor: Colors.black,
                       ),
                       obscureText: true,
                     ),
@@ -173,14 +174,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-
-// '처음이신가요?' 버튼을 입력란과 맞춰서 오른쪽 정렬
             Align(
-              alignment: Alignment.center,  // 입력란과 같은 80% 너비로 정렬
+              alignment: Alignment.center,
               child: FractionallySizedBox(
-                widthFactor: 0.8,  // 입력란과 동일한 부모 너비의 80%로 설정
+                widthFactor: 0.8,
                 child: Align(
-                  alignment: Alignment.centerRight,  // 오른쪽 정렬
+                  alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
                       Navigator.push(
@@ -203,15 +202,11 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-
-            Spacer(
-              flex: 4,
-            ),
-
+            Spacer(flex: 4),
             Align(
               alignment: Alignment.bottomCenter,
               child: SizedBox(
-                width: double.infinity, // 버튼을 화면 가로 길게 설정
+                width: double.infinity,
                 child: TextButton(
                   onPressed: _login,
                   child: Text(
@@ -219,22 +214,21 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(
                       fontFamily: 'SUIT-Light',
                       fontSize: 20.0,
-                      color: Colors.black, // 글자 색 검정으로 변경
+                      color: Colors.black,
                     ),
                   ),
                   style: TextButton.styleFrom(
-                    backgroundColor: Color(0xFFB8EA92), // 버튼 배경 색상 B8EA92로 설정
-                    padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 조정
+                    backgroundColor: Color(0xFFB8EA92),
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11.0), // 버튼 굴곡 설정
+                      borderRadius: BorderRadius.circular(11.0),
                     ),
-                    elevation: 8.0, // 그림자 높이 설정
-                    shadowColor: Colors.black.withOpacity(1), // 그림자 색상 및 투명도 설정
+                    elevation: 8.0,
+                    shadowColor: Colors.black.withOpacity(1),
                   ),
                 ),
               ),
             ),
-
           ],
         ),
       ),

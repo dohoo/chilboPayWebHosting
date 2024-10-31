@@ -15,7 +15,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String message = 'Please scan your QR code';
   QRViewController? controller;
-  bool isProcessing = false; // 추가: 결제 처리 상태 확인을 위한 변수
+  bool isProcessing = false;
 
   @override
   void dispose() {
@@ -26,41 +26,51 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
-      controller.pauseCamera(); // 카메라 일시 중지
-      final userIdString = scanData.code;
+      controller.pauseCamera();
 
-      if (userIdString != null) {
-        final userId = int.tryParse(userIdString);
-        if (userId == null) {
-          setState(() {
-            message = 'Invalid QR code';
-          });
-        } else {
-          // 결제 진행 상태 표시
-          setState(() {
-            isProcessing = true;
-            message = 'Processing payment...';
-          });
-
-          try {
-            final result = await AdminApi.processPayment(userId, widget.productId);
-            setState(() {
-              message = result['message'];
-            });
-          } catch (e) {
-            setState(() {
-              message = 'Failed to pay with QR code: $e';
-            });
-          } finally {
-            setState(() {
-              isProcessing = false; // 결제 완료 후 상태 업데이트
-            });
-          }
-        }
+      // QR 데이터 파싱
+      final qrData = scanData.code;
+      if (qrData == null || !qrData.contains("_")) {
+        setState(() {
+          message = 'Invalid QR format';
+        });
+        controller.resumeCamera(); // 잘못된 형식이면 다시 카메라 재개
+        return;
       }
 
-      // 결제 처리 완료 후 카메라 재개
-      controller.resumeCamera();
+      // QR 데이터 구조 검증
+      final parts = qrData.split("_");
+      final userId = int.tryParse(parts[0]);
+      final timestamp = int.tryParse(parts[1]);
+
+      if (userId == null || timestamp == null) {
+        setState(() {
+          message = 'Invalid QR code';
+        });
+        controller.resumeCamera();
+        return;
+      }
+
+      setState(() {
+        isProcessing = true;
+        message = 'Processing payment...';
+      });
+
+      try {
+        final result = await AdminApi.processPayment(userId, widget.productId);
+        setState(() {
+          message = result['message'];
+        });
+      } catch (e) {
+        setState(() {
+          message = 'Failed to pay with QR code: $e';
+        });
+      } finally {
+        setState(() {
+          isProcessing = false;
+        });
+        controller.resumeCamera();
+      }
     });
   }
 
@@ -81,7 +91,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
             flex: 1,
             child: Center(
               child: isProcessing
-                  ? CircularProgressIndicator() // 결제 진행 중일 때 로딩 인디케이터 표시
+                  ? CircularProgressIndicator()
                   : Text(
                 message,
                 style: TextStyle(fontSize: 16),

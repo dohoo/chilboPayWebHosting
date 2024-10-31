@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/admin_api.dart'; // AdminApi import
 
 class NfcPaymentPage extends StatefulWidget {
-  final List<Map<String, dynamic>> selectedProducts; // 선택된 상품 목록
+  final List<Map<String, dynamic>> selectedProducts;
 
   NfcPaymentPage({required this.selectedProducts});
 
@@ -18,16 +17,20 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
 
   Future<void> _payNfcCard() async {
     setState(() {
-      isLoading = true;
-      message = 'Processing payment for ${widget.selectedProducts.length} products...';
+      isLoading = true; // 로딩 시작
+      message = 'Processing payment...';
     });
+
     try {
+      // NFC 태그 대기
       NFCTag tag = await FlutterNfcKit.poll();
       String cardId = tag.id;
 
+      // 카드 ID로 사용자 확인
       final userData = await AdminApi.fetchUserByCard(cardId);
       final userId = userData['userId'];
 
+      // 선택된 상품 개별 결제 처리
       for (var product in widget.selectedProducts) {
         final int productId = product['id'];
         final int count = product['count'];
@@ -37,11 +40,13 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
           if (!result['success']) {
             setState(() {
               message = result['message'];
+              isLoading = false; // 로딩 종료
             });
-            break;
+            return; // 결제 실패 시 종료
           }
         }
       }
+
       setState(() {
         message = 'Payment completed successfully!';
       });
@@ -50,9 +55,9 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
         message = 'Failed to pay with NFC card: $e';
       });
     } finally {
-      await FlutterNfcKit.finish();
+      await FlutterNfcKit.finish(); // NFC 모드 종료
       setState(() {
-        isLoading = false;
+        isLoading = false; // 로딩 종료
       });
     }
   }
@@ -60,7 +65,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
   @override
   void initState() {
     super.initState();
-    _payNfcCard();
+    Future.delayed(Duration(seconds: 1), _payNfcCard); // 페이지가 열리고 1초 후 NFC 결제 시작
   }
 
   @override
@@ -70,11 +75,18 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
         title: Text('Payment NFC Card'),
       ),
       body: Center(
-        child: isLoading
-            ? CircularProgressIndicator()
-            : Padding(
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Text(message),
+          child: isLoading
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(), // 로딩 표시
+              SizedBox(height: 16),
+              Text('Processing payment...'),
+            ],
+          )
+              : Text(message),
         ),
       ),
     );

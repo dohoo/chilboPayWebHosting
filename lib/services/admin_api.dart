@@ -89,15 +89,14 @@ class AdminApi {
     }
   }
 
-  // Fetch total user money
-  static Future<int> fetchTotalUserMoney() async {
-    final response = await http.get(Uri.parse('$baseUrl/totalUserMoney'));
+  // Fetch total money for users and festivals
+  static Future<Map<String, dynamic>> fetchTotalMoney() async {
+    final response = await http.get(Uri.parse('$baseUrl/totalMoney'));
 
     if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      return int.parse(jsonResponse['total']);
+      return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load total user money');
+      throw Exception('Failed to load total money');
     }
   }
 

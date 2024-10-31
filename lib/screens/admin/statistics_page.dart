@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'transactions_page.dart';
-import '../../services/admin_api.dart'; // AdminApi import
+import '../../services/admin_api.dart';
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -9,19 +9,21 @@ class StatisticsPage extends StatefulWidget {
 
 class _StatisticsPageState extends State<StatisticsPage> {
   int _totalUserMoney = 0;
+  int _totalFestivalMoney = 0;
   String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    fetchTotalUserMoney();
+    fetchTotalMoney();
   }
 
-  Future<void> fetchTotalUserMoney() async {
+  Future<void> fetchTotalMoney() async {
     try {
-      final totalMoney = await AdminApi.fetchTotalUserMoney(); // AdminApi 사용
+      final totals = await AdminApi.fetchTotalMoney();
       setState(() {
-        _totalUserMoney = totalMoney;
+        _totalUserMoney = int.parse(totals['totalUserMoney'].toString());
+        _totalFestivalMoney = int.parse(totals['totalFestivalMoney'].toString());
       });
     } catch (e) {
       setState(() {
@@ -41,7 +43,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _errorMessage.isEmpty
-                ? Text('Total money of users: $_totalUserMoney')
+                ? Column(
+              children: [
+                Text('Total money of users: $_totalUserMoney'),
+                Text('Total money of festivals: $_totalFestivalMoney'),
+              ],
+            )
                 : Text(_errorMessage),
             SizedBox(height: 20),
             ElevatedButton(

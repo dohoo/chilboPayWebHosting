@@ -28,26 +28,50 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) async {
       controller.pauseCamera();
-      final userId = int.tryParse(scanData.code ?? '');
 
-      if (userId == null) {
+      // QR 데이터 검증
+      final qrData = scanData.code;
+      if (qrData == null || !qrData.contains("_")) {
+        setState(() {
+          message = 'Invalid QR format';
+        });
+        controller.resumeCamera();
+        return;
+      }
+
+      // QR 데이터 구조 분리 및 검증
+      final parts = qrData.split("_");
+      final userId = int.tryParse(parts[0]);
+      final timestamp = int.tryParse(parts[1]);
+
+      if (userId == null || timestamp == null) {
         setState(() {
           message = 'Invalid QR code';
         });
-      } else {
-        setState(() {
-          isProcessing = true;
-          message = 'Processing payment...';
-        });
+        controller.resumeCamera();
+        return;
+      }
 
+      setState(() {
+        isProcessing = true;
+        message = 'Processing payment...';
+      });
+
+      try {
         final result = await FestivalApi.processQrPayment(userId, widget.productId, widget.festivalId);
-
         setState(() {
           message = result['message'];
+        });
+      } catch (e) {
+        setState(() {
+          message = 'Failed to pay with QR code: $e';
+        });
+      } finally {
+        setState(() {
           isProcessing = false;
         });
+        controller.resumeCamera();
       }
-      controller.resumeCamera();
     });
   }
 

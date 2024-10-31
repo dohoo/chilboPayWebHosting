@@ -28,7 +28,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       setState(() {
         _errorMessage = 'Error: $e';
       });
-      print('Exception: $e');
     }
   }
 
@@ -61,6 +60,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
                 itemBuilder: (context, index) {
                   final transaction = transactions[index];
+
+                  // `null` 또는 필드 누락 시 '알 수 없음'으로 표시
+                  final String sender = (transaction['sender'] != null && transaction.containsKey('sender'))
+                      ? transaction['sender'].toString()
+                      : '알 수 없음';
+
+                  final String receiver = (transaction['receiver'] != null && transaction.containsKey('receiver'))
+                      ? transaction['receiver'].toString()
+                      : '알 수 없음';
+
                   final int amount = (double.parse(transaction['amount'].toString())).toInt();
 
                   // UTC 날짜 문자열을 DateTime으로 변환 후 KST로 변환
@@ -68,7 +77,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   final DateTime kstDate = _convertToKST(utcDate);
 
                   return ListTile(
-                    title: Text('${transaction['sender']} -> ${transaction['receiver']}'),
+                    title: Text('$sender -> $receiver'),
                     subtitle: Text(formatDate.format(kstDate)), // 한국 시간대로 변환된 시간 표시
                     trailing: Text(
                       formatCurrency.format(amount),

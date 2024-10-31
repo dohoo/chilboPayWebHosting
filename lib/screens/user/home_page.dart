@@ -53,9 +53,9 @@ class _HomePageState extends State<HomePage> {
       final userData = await UserApi.fetchUserData(userId);
       setState(() {
         username = userData['username'];
-        money = (userData['money'] as num).toInt(); // Convert to int
+        money = (userData['money'] as num).toInt();
       });
-      _generateQrCode(); // username이 로드된 후에 QR 코드 생성
+      await _generateQrCode(userId); // username이 로드된 후에 QR 코드 생성
     } catch (e) {
       print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,11 +64,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _generateQrCode() {
-    setState(() {
-      qrData = '${username}_${DateTime.now().millisecondsSinceEpoch}';
-      remainingTime = 60; // Reset timer
-    });
+  Future<void> _generateQrCode(int userId) async {
+    try {
+      final token = await UserApi.generateQrToken(userId); // 서버에서 토큰 생성 요청
+      setState(() {
+        qrData = token;
+        remainingTime = 60; // Timer 리셋
+      });
+    } catch (e) {
+      print('Error generating QR token: $e');
+    }
   }
 
   void _startQrTimer() {
@@ -77,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         if (remainingTime > 1) {
           remainingTime -= 1;
         } else {
-          _generateQrCode();
+          _fetchUserData(); // 매 60초마다 QR 코드를 갱신
         }
       });
     });
@@ -86,7 +91,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final formatCurrency = NumberFormat("#,##0", "en_US");
-    final formattedMoney = "${formatCurrency.format(money)}P"; // 돈에 "P" 추가
+    final formattedMoney = "${formatCurrency.format(money)}P";
 
     return Scaffold(
       appBar: AppBar(
@@ -111,14 +116,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // 거래 내역 대신 계좌 정보만 표시
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.blue[100],
               borderRadius: BorderRadius.circular(10),
             ),
-            margin: EdgeInsets.only(bottom: 8), // 하단에 여백 추가
+            margin: EdgeInsets.only(bottom: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

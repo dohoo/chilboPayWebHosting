@@ -3,17 +3,20 @@ import 'dart:convert';
 
 class UserApi {
   static const String baseUrl = 'http://114.204.195.233';
+  static const Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+  };
 
   // Fetch user data by userId
   static Future<Map<String, dynamic>> fetchUserData(int userId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/user/$userId'),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/user/$userId'));
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to load user data');
+        final error = jsonDecode(response.body);
+        throw Exception('Failed to load user data: ${error['message']}');
       }
     } catch (e) {
       throw Exception('Error fetching user data: $e');
@@ -31,14 +34,13 @@ class UserApi {
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/user/$userId'),
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
+        headers: headers,
         body: jsonEncode(body),
       );
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to update user');
+        final error = jsonDecode(response.body);
+        throw Exception('Failed to update user: ${error['message']}');
       }
     } catch (e) {
       throw Exception('Error updating user: $e');
@@ -48,13 +50,13 @@ class UserApi {
   // Fetch user transactions by userId
   static Future<List<dynamic>> fetchTransactions(int userId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/transactions/$userId'),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/transactions/$userId'));
+
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to load transactions');
+        final error = jsonDecode(response.body);
+        throw Exception('Failed to load transactions: ${error['message']}');
       }
     } catch (e) {
       throw Exception('Error fetching transactions: $e');
@@ -66,10 +68,8 @@ class UserApi {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/register-nfc'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
+        headers: headers,
+        body: jsonEncode({
           'userId': userId,
           'cardId': cardId,
         }),
@@ -91,10 +91,8 @@ class UserApi {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/unregister-nfc'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
+        headers: headers,
+        body: jsonEncode({
           'userId': userId,
           'cardId': cardId,
         }),
@@ -114,15 +112,56 @@ class UserApi {
   // Delete user account
   static Future<void> deleteUser(int userId) async {
     try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/user/$userId'),
-      );
+      final response = await http.delete(Uri.parse('$baseUrl/user/$userId'));
 
       if (response.statusCode != 200) {
-        throw Exception('Failed to delete account');
+        final error = jsonDecode(response.body);
+        throw Exception('Failed to delete account: ${error['message']}');
       }
     } catch (e) {
       throw Exception('Error deleting account: $e');
+    }
+  }
+
+  // QR 토큰 생성 API
+  static Future<String> generateQrToken(int userId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/generateQrToken'),
+        headers: headers,
+        body: jsonEncode({'userId': userId}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['token'];
+      } else {
+        throw Exception('Failed to generate QR token');
+      }
+    } catch (e) {
+      throw Exception('Error generating QR token: $e');
+    }
+  }
+
+  // QR 결제 요청
+  static Future<Map<String, dynamic>> processQrPayment(String token, int productId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/purchaseWithQr'),
+        headers: headers,
+        body: jsonEncode({
+          'token': token,
+          'productId': productId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to process QR payment');
+      }
+    } catch (e) {
+      throw Exception('Error processing QR payment: $e');
     }
   }
 }

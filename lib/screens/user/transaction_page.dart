@@ -63,8 +63,8 @@ class _TransactionPageState extends State<TransactionPage> {
                 itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
                 itemBuilder: (context, index) {
                   final transaction = transactions[index];
-                  final String sender = transaction['sender'];
-                  final String receiver = transaction['receiver'];
+                  final String sender = transaction['sender'] == null ? '알 수 없음' : transaction['sender'].toString();
+                  final String receiver = transaction['receiver'] == null ? '알 수 없음' : transaction['receiver'].toString();
                   final String date = transaction['date'];
 
                   // amount를 안전하게 double로 변환
