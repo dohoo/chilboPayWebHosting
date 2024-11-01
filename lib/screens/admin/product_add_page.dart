@@ -3,33 +3,46 @@ import 'package:flutter/services.dart';
 
 class ProductAddPage extends StatefulWidget {
   final List<Map<String, dynamic>> existingProducts;
+  final List<Map<String, dynamic>> existingActivities;
 
-  ProductAddPage({Key? key, required this.existingProducts}) : super(key: key);
+  ProductAddPage({
+    Key? key,
+    required this.existingProducts,
+    required this.existingActivities,
+  }) : super(key: key);
 
   @override
   _ProductAddPageState createState() => _ProductAddPageState();
 }
 
 class _ProductAddPageState extends State<ProductAddPage> {
-  final List<Map<String, dynamic>> products = [];
-  final productNameController = TextEditingController();
-  final productPriceController = TextEditingController();
+  List<Map<String, dynamic>> products = [];
+  List<Map<String, dynamic>> activities = [];
+  final nameController = TextEditingController();
+  final priceController = TextEditingController();
+  bool isProduct = true;
 
   @override
   void initState() {
     super.initState();
-    products.addAll(widget.existingProducts);
+    products = List<Map<String, dynamic>>.from(widget.existingProducts);
+    activities = List<Map<String, dynamic>>.from(widget.existingActivities);
   }
 
-  void _addProduct() {
-    final name = productNameController.text;
-    final price = int.tryParse(productPriceController.text) ?? 0;
+  void _addItem() {
+    final name = nameController.text;
+    final price = int.tryParse(priceController.text) ?? 0;
+
     if (name.isNotEmpty && price > 0) {
       setState(() {
-        products.add({'name': name, 'price': price});
+        if (isProduct) {
+          products.add({'name': name, 'price': price});
+        } else {
+          activities.add({'name': name, 'price': price});
+        }
       });
-      productNameController.clear();
-      productPriceController.clear();
+      nameController.clear();
+      priceController.clear();
     }
   }
 
@@ -37,36 +50,87 @@ class _ProductAddPageState extends State<ProductAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Festival Products'),
+        title: Text('Add Products and Activities'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: productNameController,
-              decoration: InputDecoration(labelText: 'Product Name'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      isProduct = true;
+                    });
+                  },
+                  child: Text(
+                    'Add Product',
+                    style: TextStyle(color: isProduct ? Colors.blue : Colors.grey),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      isProduct = false;
+                    });
+                  },
+                  child: Text(
+                    'Add Activity',
+                    style: TextStyle(color: !isProduct ? Colors.blue : Colors.grey),
+                  ),
+                ),
+              ],
             ),
             TextField(
-              controller: productPriceController,
-              decoration: InputDecoration(labelText: 'Product Price'),
+              controller: nameController,
+              decoration: InputDecoration(labelText: isProduct ? 'Product Name' : 'Activity Name'),
+            ),
+            TextField(
+              controller: priceController,
+              decoration: InputDecoration(labelText: 'Price'),
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly], // 숫자만 입력 가능
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),
             ElevatedButton(
-              onPressed: _addProduct,
-              child: Text('Add Product'),
+              onPressed: _addItem,
+              child: Text(isProduct ? 'Add Product' : 'Add Activity'),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products[index];
-                  return ListTile(
-                    title: Text(product['name']),
-                    subtitle: Text('Price: ${product['price']}'),
-                  );
-                },
+              child: ListView(
+                children: [
+                  if (products.isNotEmpty) ...[
+                    ListTile(title: Text('Products', style: TextStyle(fontWeight: FontWeight.bold))),
+                    ...products.map((product) => ListTile(
+                      title: Text(product['name']),
+                      subtitle: Text('Price: ${product['price']}'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            products.remove(product);
+                          });
+                        },
+                      ),
+                    )),
+                  ],
+                  if (activities.isNotEmpty) ...[
+                    ListTile(title: Text('Activities', style: TextStyle(fontWeight: FontWeight.bold))),
+                    ...activities.map((activity) => ListTile(
+                      title: Text(activity['name']),
+                      subtitle: Text('Reward: ${activity['price']}'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          setState(() {
+                            activities.remove(activity);
+                          });
+                        },
+                      ),
+                    )),
+                  ],
+                ],
               ),
             ),
           ],
@@ -74,10 +138,10 @@ class _ProductAddPageState extends State<ProductAddPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pop(context, products); // 이전 페이지로 상품 리스트 반환
+          Navigator.pop(context, {'products': products, 'activities': activities});
         },
-        child: Icon(Icons.arrow_back),
-        tooltip: 'Return to Account Creation',
+        child: Icon(Icons.check),
+        tooltip: 'Save and Return',
       ),
     );
   }

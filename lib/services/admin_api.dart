@@ -186,18 +186,26 @@ class AdminApi {
   }
 
   // Create an account
-  static Future<void> createAccount(String role, String username, String password, int money, List<Map<String, dynamic>> products) async {
+  static Future<void> createAccount(
+      String role,
+      String username,
+      String password,
+      int money,
+      List<Map<String, dynamic>> products,
+      List<Map<String, dynamic>> activities,
+      ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/createAccount'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({
-        'role': role,               // accountType을 role로 변경
+        'role': role,
         'username': username,
         'password': password,
-        'points': money,             // money 필드를 points로 변환
+        'points': money,
         'products': products,
+        'activities': activities,  // activities 추가
       }),
     );
 
@@ -239,6 +247,23 @@ class AdminApi {
     } else {
       final error = jsonDecode(response.body);
       return {'success': false, 'message': error['message']};
+    }
+  }
+
+  // 사용자 제품 및 활동 업데이트
+  static Future<void> updateUserProductsAndActivities(
+      int userId, List<Map<String, dynamic>> products, List<Map<String, dynamic>> activities) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/user/$userId/products-activities'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'products': products,
+        'activities': activities,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update products and activities');
     }
   }
 }

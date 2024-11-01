@@ -227,4 +227,32 @@ class FestivalApi {
       throw Exception('Failed to load festival products');
     }
   }
+
+  // 축제 활동 목록 가져오기
+  static Future<List<dynamic>> fetchFestivalActivities(int festivalId) async {
+    final response = await http.get(Uri.parse('$baseUrl/festivalActivities?festivalId=$festivalId'));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load festival activities');
+    }
+  }
+
+  // 축제 활동 추가
+  static Future<void> addFestivalActivity(int festivalId, String name, int price) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/festivalActivities'),
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode({
+        'festivalId': festivalId,
+        'name': name,
+        'price': price,
+      }),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add festival activity');
+    }
+  }
 }

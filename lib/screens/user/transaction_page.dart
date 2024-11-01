@@ -67,35 +67,38 @@ class _TransactionPageState extends State<TransactionPage> {
         child: Column(
           children: [
             Expanded(
-              child: transactions.isEmpty
-                  ? Center(child: Text('No transaction history available'))
-                  : ListView.builder(
-                itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
-                itemBuilder: (context, index) {
-                  final transaction = transactions[index];
-                  final String sender = transaction['sender'] == null ? '알 수 없음' : transaction['sender'].toString();
-                  final String receiver = transaction['receiver'] == null ? '알 수 없음' : transaction['receiver'].toString();
-                  final String date = _formatDate(transaction['date']); // 한국 시간으로 포맷
+              child: RefreshIndicator(
+                onRefresh: _fetchTransactions, // 아래로 당길 때 트랜잭션 새로고침
+                child: transactions.isEmpty
+                    ? Center(child: Text('No transaction history available'))
+                    : ListView.builder(
+                  itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
+                  itemBuilder: (context, index) {
+                    final transaction = transactions[index];
+                    final String sender = transaction['sender'] == null ? '알 수 없음' : transaction['sender'].toString();
+                    final String receiver = transaction['receiver'] == null ? '알 수 없음' : transaction['receiver'].toString();
+                    final String date = _formatDate(transaction['date']); // 한국 시간으로 포맷
 
-                  // amount를 안전하게 double로 변환
-                  double amount;
-                  try {
-                    amount = double.parse(transaction['amount'].toString());
-                  } catch (e) {
-                    amount = 0.0; // 변환 실패 시 기본값 사용
-                  }
+                    // amount를 안전하게 double로 변환
+                    double amount;
+                    try {
+                      amount = double.parse(transaction['amount'].toString());
+                    } catch (e) {
+                      amount = 0.0; // 변환 실패 시 기본값 사용
+                    }
 
-                  return ListTile(
-                    title: Text('$sender → $receiver'),
-                    subtitle: Text(date),
-                    trailing: Text(
-                      '${amount.toStringAsFixed(2)} P',
-                      style: TextStyle(
-                        color: amount < 0 ? Colors.red : Colors.green,
+                    return ListTile(
+                      title: Text('$sender → $receiver'),
+                      subtitle: Text(date),
+                      trailing: Text(
+                        '${amount.toStringAsFixed(2)} P',
+                        style: TextStyle(
+                          color: amount < 0 ? Colors.red : Colors.green,
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
             if (itemsToShow < transactions.length)

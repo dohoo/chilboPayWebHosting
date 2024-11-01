@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 숫자 입력 제한에 필요한 패키지
+import 'package:flutter/services.dart';
 import '../../services/admin_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../login/login_page.dart';
-import 'product_add_page.dart'; // 새로 추가한 페이지 임포트
+import 'product_add_page.dart';
 
 class AdminSettingsPage extends StatefulWidget {
   @override
@@ -11,7 +11,8 @@ class AdminSettingsPage extends StatefulWidget {
 }
 
 class _AdminSettingsPageState extends State<AdminSettingsPage> {
-  List<Map<String, dynamic>> products = []; // 추가된 상품 목록
+  List<Map<String, dynamic>> products = [];
+  List<Map<String, dynamic>> activities = [];
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +55,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
           content: Text('Are you sure you want to logout?'),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text('Cancel'),
             ),
             TextButton(
@@ -121,7 +120,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                   controller: moneyController,
                   decoration: InputDecoration(labelText: 'Money'),
                   keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly], // 숫자만 입력 가능
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 if (accountType == 'festival') ...[
                   ElevatedButton(
@@ -129,21 +128,21 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ProductAddPage(existingProducts: products),
+                          builder: (context) => ProductAddPage(
+                            existingProducts: products,
+                            existingActivities: activities,
+                          ),
                         ),
                       );
                       if (result != null) {
                         setState(() {
-                          products = result; // 추가된 상품 목록 업데이트
+                          products = result['products'];
+                          activities = result['activities'];
                         });
                       }
                     },
-                    child: Text('Add Festival Product'),
+                    child: Text('Add Club Product/Activity'),
                   ),
-                  ...products.map((product) => ListTile(
-                    title: Text(product['name']),
-                    subtitle: Text('Price: ${product['price']}'),
-                  )),
                 ],
               ],
             ),
@@ -151,19 +150,25 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
           actions: [
             TextButton(
               child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
               child: Text('Create'),
               onPressed: () {
                 if (passwordController.text == confirmPasswordController.text) {
-                  _createAccount(accountType, usernameController.text, passwordController.text,
-                      int.parse(moneyController.text), products);
+                  _createAccount(
+                    accountType,
+                    usernameController.text,
+                    passwordController.text,
+                    int.parse(moneyController.text),
+                    products,
+                    activities,
+                  );
                   Navigator.of(context).pop();
                 } else {
-                  print('Passwords do not match');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Passwords do not match')),
+                  );
                 }
               },
             ),
@@ -173,12 +178,23 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
     );
   }
 
-  void _createAccount(String accountType, String username, String password, int money, List<Map<String, dynamic>> products) async {
+  void _createAccount(
+      String accountType,
+      String username,
+      String password,
+      int money,
+      List<Map<String, dynamic>> products,
+      List<Map<String, dynamic>> activities,
+      ) async {
     try {
-      await AdminApi.createAccount(accountType, username, password, money, products);
-      print('Account created successfully');
+      await AdminApi.createAccount(accountType, username, password, money, products, activities);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Account created successfully')),
+      );
     } catch (e) {
-      print('Error creating account: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating account: $e')),
+      );
     }
   }
 
@@ -215,9 +231,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
           actions: [
             TextButton(
               child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
               child: Text('Change'),
@@ -226,7 +240,9 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                   _changePassword(oldPasswordController.text, newPasswordController.text);
                   Navigator.of(context).pop();
                 } else {
-                  print('New passwords do not match');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('New passwords do not match')),
+                  );
                 }
               },
             ),
@@ -239,9 +255,13 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
   void _changePassword(String oldPassword, String newPassword) async {
     try {
       await AdminApi.changePassword(oldPassword, newPassword);
-      print('Password changed successfully');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Password changed successfully')),
+      );
     } catch (e) {
-      print('Error changing password: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error changing password: $e')),
+      );
     }
   }
 }

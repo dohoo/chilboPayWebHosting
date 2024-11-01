@@ -143,4 +143,40 @@ class UserApi {
     }
   }
 
+// 사용자 이름으로 수신자 정보 가져오기
+  static Future<Map<String, dynamic>?> fetchUserDataByUsername(String username) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/user/by-username/$username'));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw Exception('Error fetching receiver data: $e');
+    }
+  }
+
+  // 송금 트랜잭션 생성
+  static Future<bool> createTransaction(int senderId, int receiverId, double amount) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/transaction'),
+        headers: headers,
+        body: jsonEncode(<String, dynamic>{
+          'senderId': senderId,
+          'receiverId': receiverId,
+          'amount': amount,
+          'userId': senderId,  // checkUserStatus 미들웨어를 위해 userId 추가
+        }),
+      );
+
+      return response.statusCode == 201;
+    } catch (e) {
+      throw Exception('Error creating transaction: $e');
+    }
+  }
+
+
 }

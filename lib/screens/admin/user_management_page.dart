@@ -4,6 +4,7 @@ import '../../services/admin_api.dart';
 import '../no_negative_number_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../login/login_page.dart';
+import 'product_manage_page.dart'; // ProductManagePage import
 
 class UserManagementPage extends StatefulWidget {
   @override
@@ -13,8 +14,8 @@ class UserManagementPage extends StatefulWidget {
 class _UserManagementPageState extends State<UserManagementPage> {
   List users = [];
   List displayedUsers = [];
-  int displayedCount = 10; // 초기 로드 개수
-  String _selectedRole = 'user'; // 'user' or 'festival'
+  int displayedCount = 10;
+  String _selectedRole = 'user';
 
   @override
   void initState() {
@@ -27,7 +28,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       final data = await AdminApi.fetchUsers();
       setState(() {
         users = data;
-        displayedUsers = users.take(displayedCount).toList(); // 첫 10개만 표시
+        displayedUsers = users.take(displayedCount).toList();
       });
     } catch (e) {
       print('Error fetching users: $e');
@@ -77,6 +78,32 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: Text('Delete Account'),
                   ),
+                  if (user['role'] == 'festival')
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductManagePage(
+                              existingProducts: user['products'] ?? [],
+                              existingActivities: user['activities'] ?? [],
+                            ),
+                          ),
+                        );
+
+                        if (result != null) {
+                          // 상품과 활동을 업데이트할 API 호출
+                          await AdminApi.updateUserProductsAndActivities(
+                            user['id'],
+                            result['products'],
+                            result['activities'],
+                          );
+                          _fetchUsers(); // 업데이트 후 사용자 목록 새로고침
+                        }
+                      },
+                      child: Text('Manage Products/Activities'),
+                    ),
                 ],
               ),
               actions: <Widget>[
@@ -87,7 +114,13 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   child: Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () => _confirmSaveChanges(user['id'], _nameController.text, int.parse(_moneyController.text), _passwordController.text, isSuspended),
+                  onPressed: () => _confirmSaveChanges(
+                    user['id'],
+                    _nameController.text,
+                    int.parse(_moneyController.text),
+                    _passwordController.text,
+                    isSuspended,
+                  ),
                   child: Text('Save'),
                 ),
               ],
@@ -113,8 +146,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
             onPressed: () async {
               await AdminApi.deleteUser(userId);
               _fetchUsers();
-              Navigator.of(context).pop(); // Close confirmation dialog
-              Navigator.of(context).pop(); // Close options dialog
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
             child: Text('Delete'),
           ),
@@ -123,7 +156,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
     );
   }
 
-  Future<void> _confirmSaveChanges(int userId, String username, int money, String password, bool isSuspended) async {
+  Future<void> _confirmSaveChanges(
+      int userId, String username, int money, String password, bool isSuspended) async {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -137,8 +171,6 @@ class _UserManagementPageState extends State<UserManagementPage> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-
-              // 사용자 정보 업데이트 요청
               await AdminApi.updateUser(
                 userId,
                 username,
@@ -146,9 +178,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 password: password.isNotEmpty ? password : null,
                 status: isSuspended ? 'suspended' : 'active',
               );
-
-              _fetchUsers(); // 변경 사항 반영을 위해 사용자 목록 다시 로드
-              Navigator.of(context).pop(); // 옵션 다이얼로그 닫기
+              _fetchUsers();
+              Navigator.of(context).pop();
             },
             child: Text('Save'),
           ),
@@ -156,7 +187,6 @@ class _UserManagementPageState extends State<UserManagementPage> {
       ),
     );
   }
-
 
   Widget _buildManagementField(String label, TextEditingController controller, String hintText, bool isEditable,
       {bool obscureText = false}) {
@@ -171,7 +201,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             readOnly: !isEditable,
             obscureText: obscureText,
             keyboardType: isEditable ? TextInputType.number : TextInputType.text,
-            inputFormatters: isEditable ? [FilteringTextInputFormatter.digitsOnly] : null, // 숫자 입력 제한
+            inputFormatters: isEditable ? [FilteringTextInputFormatter.digitsOnly] : null,
           ),
         ),
       ],
@@ -223,7 +253,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
   void _loadMoreUsers() {
     setState(() {
-      displayedCount += 10; // 10개씩 추가 로드
+      displayedCount += 10;
       displayedUsers = users.take(displayedCount).toList();
     });
   }
@@ -273,7 +303,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   return (displayedCount < users.length)
                       ? TextButton(
                     onPressed: _loadMoreUsers,
-                    child: Text("더 보기"),
+                    child: Text("Load More"),
                   )
                       : Container();
                 }
@@ -285,7 +315,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     children: [
                       Text('${user['money']}p'),
                       SizedBox(width: 16),
-                      if (user['status'] == 'suspended') Text('정지됨', style: TextStyle(color: Colors.red)),
+                      if (user['status'] == 'suspended') Text('Suspended', style: TextStyle(color: Colors.red)),
                     ],
                   ),
                   trailing: ElevatedButton(

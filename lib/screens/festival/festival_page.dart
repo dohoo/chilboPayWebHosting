@@ -21,7 +21,7 @@ class _FestivalPageState extends State<FestivalPage> {
   void initState() {
     super.initState();
     _pages = [
-      FestivalManagementPage(id: widget.id),  // id 전달
+      FestivalManagementPage(festivalId: widget.id),  // id 전달
       FestivalPaymentPage(),
       FestivalSettingsPage(),
     ];
