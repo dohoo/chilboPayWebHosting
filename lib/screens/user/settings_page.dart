@@ -250,6 +250,15 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // 버튼 스타일 지정
+  final ButtonStyle commonButtonStyle = TextButton.styleFrom(
+    textStyle: TextStyle(
+        fontSize: 16,
+        fontFamily: 'SUIT',
+        fontWeight: FontWeight.w500,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,11 +273,16 @@ class _SettingsPageState extends State<SettingsPage> {
             // 상단 이름 섹션
             Text(
               '$username님',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontFamily: 'SUIT',
+                fontWeight: FontWeight.w800,
+                fontSize: 35,
+              ),
             ),
+            SizedBox(height: 15.0,),
             Divider(thickness: 1, color: Colors.grey),
             // NFC 카드 등록 / 해지
-            ElevatedButton(
+            TextButton(
               onPressed: isSuspended
                   ? _showSuspendedMessage
                   : () {
@@ -283,36 +297,42 @@ class _SettingsPageState extends State<SettingsPage> {
                   _fetchUserData(); // NFC 카드 등록/해지 후 사용자 정보 새로고침
                 });
               },
+              style: commonButtonStyle,
               child: Text(nfcCardId.isEmpty ? '카드 연동' : '카드 연동 해지'),
             ),
             Divider(thickness: 1, color: Colors.grey),
             // 계정 관리 섹션
-            ElevatedButton(
+            TextButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showUpdateUsernameDialog,
+              style: commonButtonStyle,
               child: Text('아이디 변경'),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showUpdatePasswordDialog,
+              style: commonButtonStyle,
               child: Text('비밀번호 변경'),
             ),
             Divider(thickness: 1, color: Colors.grey),
             // 개인정보 처리 방침
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => TermsPage()),
                 );
               },
+              style: commonButtonStyle,
               child: Text('개인정보 처리 방침'),
             ),
             // 기타 설정 섹션
-            ElevatedButton(
+            TextButton(
               onPressed: _showLogoutConfirmationDialog,
+              style: commonButtonStyle,
               child: Text('로그아웃'),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showDeleteAccountConfirmationDialog,
+              style: commonButtonStyle,
               child: Text('탈퇴하기'),
             ),
           ],

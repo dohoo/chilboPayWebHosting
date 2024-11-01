@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home Page'),
+        title: Text('결제하기'),
       ),
       body: Column(
         children: <Widget>[
@@ -154,9 +154,11 @@ class _HomePageState extends State<HomePage> {
                     data: qrData,
                     version: QrVersions.auto,
                     size: 200.0,
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.all(10),
                   ),
                   SizedBox(height: 10),
-                  Text('QR code refreshes in $remainingTime seconds'),
+                  Text('$remainingTime초 뒤 재생성'),
                 ],
               ),
             ),
@@ -164,7 +166,7 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue[100],
+              color: const Color(0xFFB8EA92),
               borderRadius: BorderRadius.circular(10),
             ),
             margin: EdgeInsets.only(bottom: 8),
@@ -176,11 +178,11 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Text(
                       '내 계좌',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                     Text(
-                      username,
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      '$username님',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
                     ),
                   ],
                 ),
@@ -189,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                   alignment: Alignment.bottomRight,
                   child: Text(
                     formattedMoney,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                   ),
                 ),
               ],

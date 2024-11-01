@@ -77,8 +77,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF2F4F0),  // 배경 색상 변경
+    return Scaffold(  // 배경 색상 변경
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -192,7 +191,6 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         fontFamily: 'SUIT-ExtraLight',
                         fontSize: 15.0,
-                        color: Colors.black,
                       ),
                     ),
                     style: TextButton.styleFrom(
@@ -213,18 +211,9 @@ class _LoginPageState extends State<LoginPage> {
                     '시작하기',
                     style: TextStyle(
                       fontFamily: 'SUIT-Light',
-                      fontSize: 20.0,
+                      fontSize: 10.0,
                       color: Colors.black,
                     ),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Color(0xFFB8EA92),
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(11.0),
-                    ),
-                    elevation: 8.0,
-                    shadowColor: Colors.black.withOpacity(1),
                   ),
                 ),
               ),

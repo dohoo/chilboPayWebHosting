@@ -39,19 +39,19 @@ class _UserPageState extends State<UserPage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.send),
-            label: 'Send Money',
+            label: '송금',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.swap_horiz),
-            label: 'Transaction',
+            label: '거래내역',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: '결제',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: '설정',
           ),
         ],
         currentIndex: _selectedIndex,

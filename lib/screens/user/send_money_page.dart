@@ -70,23 +70,32 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
+            SizedBox(height: 100),
             TextField(
               controller: _receiverController,
-              decoration: InputDecoration(labelText: 'Receiver Username'),
+              decoration: InputDecoration(labelText: '받는 사람'),
             ),
+            SizedBox(height: 50),
             TextField(
               controller: _amountController,
-              decoration: InputDecoration(labelText: 'Amount'),
+              decoration: InputDecoration(labelText: '금액'),
               keyboardType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.digitsOnly,
                 NoNegativeNumberFormatter(),
               ],
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
+            SizedBox(height: 150),
+            TextButton(
               onPressed: _sendMoney,
-              child: Text('Send Money'),
+              child: Text('송금하기'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(11.0),
+                ),
+              ),
             ),
           ],
         ),
