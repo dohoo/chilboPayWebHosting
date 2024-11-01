@@ -266,4 +266,27 @@ class AdminApi {
       throw Exception('Failed to update products and activities');
     }
   }
+
+  // 축제 제품 목록 가져오기
+  static Future<List<dynamic>> fetchFestivalProducts(int festivalId) async {
+    final response = await http.get(Uri.parse('$baseUrl/festivalProducts?festivalId=$festivalId'));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load festival products');
+    }
+  }
+
+// 축제 활동 목록 가져오기
+  static Future<List<dynamic>> fetchFestivalActivities(int festivalId) async {
+    final response = await http.get(Uri.parse('$baseUrl/festivalActivities?festivalId=$festivalId'));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load festival activities');
+    }
+  }
+
 }

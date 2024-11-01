@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/admin_api.dart';
-import '../no_negative_number_formatter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../login/login_page.dart';
-import 'product_manage_page.dart'; // ProductManagePage import
+import 'product_manage_page.dart';
 
 class UserManagementPage extends StatefulWidget {
   @override
@@ -37,6 +36,15 @@ class _UserManagementPageState extends State<UserManagementPage> {
       );
       await _logout();
     }
+  }
+
+  Future<void> _refreshUsers() async {
+    setState(() {
+      displayedCount = 10;
+      users.clear();
+      displayedUsers.clear();
+    });
+    await _fetchUsers();
   }
 
   void _showUserOptionsDialog(Map<String, dynamic> user) {
@@ -82,24 +90,26 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     ElevatedButton(
                       onPressed: () async {
                         Navigator.pop(context);
+                        final products = (await AdminApi.fetchFestivalProducts(user['id'])).cast<Map<String, dynamic>>();
+                        final activities = (await AdminApi.fetchFestivalActivities(user['id'])).cast<Map<String, dynamic>>();
+
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => ProductManagePage(
-                              existingProducts: user['products'] ?? [],
-                              existingActivities: user['activities'] ?? [],
+                              existingProducts: products,
+                              existingActivities: activities,
                             ),
                           ),
                         );
 
                         if (result != null) {
-                          // 상품과 활동을 업데이트할 API 호출
                           await AdminApi.updateUserProductsAndActivities(
                             user['id'],
                             result['products'],
                             result['activities'],
                           );
-                          _fetchUsers(); // 업데이트 후 사용자 목록 새로고침
+                          _fetchUsers();
                         }
                       },
                       child: Text('Manage Products/Activities'),
@@ -200,8 +210,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             decoration: InputDecoration(hintText: hintText),
             readOnly: !isEditable,
             obscureText: obscureText,
-            keyboardType: isEditable ? TextInputType.number : TextInputType.text,
-            inputFormatters: isEditable ? [FilteringTextInputFormatter.digitsOnly] : null,
+            keyboardType: TextInputType.text,
           ),
         ),
       ],
@@ -296,34 +305,37 @@ class _UserManagementPageState extends State<UserManagementPage> {
             ],
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: filteredUsers.length + 1,
-              itemBuilder: (context, index) {
-                if (index == filteredUsers.length) {
-                  return (displayedCount < users.length)
-                      ? TextButton(
-                    onPressed: _loadMoreUsers,
-                    child: Text("Load More"),
-                  )
-                      : Container();
-                }
+            child: RefreshIndicator(
+              onRefresh: _refreshUsers,
+              child: ListView.builder(
+                itemCount: filteredUsers.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == filteredUsers.length) {
+                    return (displayedCount < users.length)
+                        ? TextButton(
+                      onPressed: _loadMoreUsers,
+                      child: Text("Load More"),
+                    )
+                        : Container();
+                  }
 
-                final user = filteredUsers[index];
-                return ListTile(
-                  title: Text(user['username']),
-                  subtitle: Row(
-                    children: [
-                      Text('${user['money']}p'),
-                      SizedBox(width: 16),
-                      if (user['status'] == 'suspended') Text('Suspended', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                  trailing: ElevatedButton(
-                    onPressed: () => _showUserOptionsDialog(user),
-                    child: Text('Manage'),
-                  ),
-                );
-              },
+                  final user = filteredUsers[index];
+                  return ListTile(
+                    title: Text(user['username']),
+                    subtitle: Row(
+                      children: [
+                        Text('${user['money']}p'),
+                        SizedBox(width: 16),
+                        if (user['status'] == 'suspended') Text('Suspended', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                    trailing: ElevatedButton(
+                      onPressed: () => _showUserOptionsDialog(user),
+                      child: Text('Manage'),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
