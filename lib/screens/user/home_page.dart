@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _fetchUserData();
+    _loadQrData(); // QR 데이터를 SharedPreferences에서 로드
     _startQrTimer();
   }
 
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
         username = userData['username'];
         money = (userData['money'] as num).toInt();
       });
-      await _generateQrCode(userId); // username이 로드된 후에 QR 코드 생성
+      await _checkQrCode(userId); // username이 로드된 후 QR 코드 체크
     } catch (e) {
       print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,13 +65,47 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _loadQrData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final savedQrData = prefs.getString('qrData') ?? '';
+    final lastGeneratedTime = prefs.getInt('lastQrGeneratedTime') ?? 0;
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+
+    if (savedQrData.isNotEmpty && (currentTime - lastGeneratedTime) < 60000) {
+      setState(() {
+        qrData = savedQrData;
+        remainingTime = 60 - ((currentTime - lastGeneratedTime) ~/ 1000);
+      });
+    }
+  }
+
+  Future<void> _checkQrCode(int userId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final lastGeneratedTime = prefs.getInt('lastQrGeneratedTime') ?? 0;
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+
+    if ((currentTime - lastGeneratedTime) >= 60000) {
+      await _generateQrCode(userId); // 60초 이상 경과 시 새로 QR 생성
+    } else {
+      setState(() {
+        remainingTime = 60 - ((currentTime - lastGeneratedTime) ~/ 1000);
+      });
+    }
+  }
+
   Future<void> _generateQrCode(int userId) async {
     try {
       final token = await UserApi.generateQrToken(userId); // 서버에서 토큰 생성 요청
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+
       setState(() {
         qrData = token;
-        remainingTime = 60; // Timer 리셋
+        remainingTime = 60;
       });
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('qrData', token); // QR 데이터를 저장
+      await prefs.setInt('lastQrGeneratedTime', currentTime); // 생성 시간 기록
     } catch (e) {
       print('Error generating QR token: $e');
     }
@@ -82,10 +117,20 @@ class _HomePageState extends State<HomePage> {
         if (remainingTime > 1) {
           remainingTime -= 1;
         } else {
-          _fetchUserData(); // 매 60초마다 QR 코드를 갱신
+          _timer?.cancel(); // 기존 타이머 중지
+          _refreshQrCode(); // QR 코드 갱신
         }
       });
     });
+  }
+
+  Future<void> _refreshQrCode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userId');
+    if (userId != null) {
+      await _generateQrCode(userId); // 새 QR 코드 생성
+      _startQrTimer(); // 타이머 초기화 후 재시작
+    }
   }
 
   @override

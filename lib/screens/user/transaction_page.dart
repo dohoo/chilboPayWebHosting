@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/user_api.dart';
+import 'package:intl/intl.dart';
 
 class TransactionPage extends StatefulWidget {
   @override
@@ -46,6 +47,15 @@ class _TransactionPageState extends State<TransactionPage> {
     });
   }
 
+  String _formatDate(String utcDate) {
+    try {
+      DateTime dateTime = DateTime.parse(utcDate).add(Duration(hours: -9)); // KST 시간대로 강제 변환
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime); // 원하는 형식으로 날짜를 포맷팅
+    } catch (e) {
+      return utcDate; // 변환 실패 시 원본 반환
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +75,7 @@ class _TransactionPageState extends State<TransactionPage> {
                   final transaction = transactions[index];
                   final String sender = transaction['sender'] == null ? '알 수 없음' : transaction['sender'].toString();
                   final String receiver = transaction['receiver'] == null ? '알 수 없음' : transaction['receiver'].toString();
-                  final String date = transaction['date'];
+                  final String date = _formatDate(transaction['date']); // 한국 시간으로 포맷
 
                   // amount를 안전하게 double로 변환
                   double amount;

@@ -38,8 +38,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   // UTC 시간을 KST로 변환하는 함수
-  DateTime _convertToKST(DateTime utcDateTime) {
-    return utcDateTime.toUtc().add(Duration(hours: 9)); // UTC에 9시간 추가
+  DateTime _convertToKST(String utcDateString) {
+    DateTime utcDateTime = DateTime.parse(utcDateString);
+    return utcDateTime.add(Duration(hours: -9)); // UTC에 9시간 추가해 KST로 변환
   }
 
   @override
@@ -61,20 +62,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 itemBuilder: (context, index) {
                   final transaction = transactions[index];
 
-                  // `null` 또는 필드 누락 시 '알 수 없음'으로 표시
-                  final String sender = (transaction['sender'] != null && transaction.containsKey('sender'))
-                      ? transaction['sender'].toString()
-                      : '알 수 없음';
+                  // 필드 누락 시 '알 수 없음'으로 표시
+                  final String sender = transaction['sender']?.toString() ?? '알 수 없음';
+                  final String receiver = transaction['receiver']?.toString() ?? '알 수 없음';
 
-                  final String receiver = (transaction['receiver'] != null && transaction.containsKey('receiver'))
-                      ? transaction['receiver'].toString()
-                      : '알 수 없음';
-
+                  // 금액을 안전하게 변환
                   final int amount = (double.parse(transaction['amount'].toString())).toInt();
 
                   // UTC 날짜 문자열을 DateTime으로 변환 후 KST로 변환
-                  final DateTime utcDate = DateTime.parse(transaction['date']).toUtc();
-                  final DateTime kstDate = _convertToKST(utcDate);
+                  final DateTime kstDate = _convertToKST(transaction['date']);
 
                   return ListTile(
                     title: Text('$sender -> $receiver'),
