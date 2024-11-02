@@ -111,14 +111,19 @@ class UserApi {
     }
   }
 
-  // 사용자 계정 삭제 메서드
-  static Future<void> deleteUser(int userId) async {
+  // UserApi 클래스의 deleteUser 메서드
+  static Future<bool> deleteUser(int userId, String password) async {
     try {
-      final response = await http.delete(Uri.parse('$baseUrl/user/$userId'));
+      final response = await http.post(
+        Uri.parse('$baseUrl/user/$userId/delete'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'password': password}),
+      );
 
-      if (response.statusCode != 200) {
-        final error = jsonDecode(response.body);
-        throw Exception('Failed to delete account: ${error['message']}');
+      if (response.statusCode == 200) {
+        return true; // 성공 시 true 반환
+      } else {
+        return false; // 실패 시 false 반환
       }
     } catch (e) {
       throw Exception('Error deleting account: $e');

@@ -215,20 +215,22 @@ class AdminApi {
   }
 
   // Change password
-  static Future<void> changePassword(String oldPassword, String newPassword) async {
+  static Future<void> changePassword(int userId, String oldPassword, String newPassword) async {
     final response = await http.put(
       Uri.parse('$baseUrl/changePassword'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({
+        'userId': userId, // userId 추가
         'oldPassword': oldPassword,
         'newPassword': newPassword,
       }),
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Failed to change password');
+      final errorData = jsonDecode(response.body);
+      throw Exception(errorData['message'] ?? 'Failed to change password');
     }
   }
 

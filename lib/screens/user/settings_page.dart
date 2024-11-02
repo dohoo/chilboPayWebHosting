@@ -87,7 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _deleteAccount() async {
+  Future<void> _deleteAccount(String password) async {
     if (isSuspended) {
       _showSuspendedMessage();
       return;
@@ -97,15 +97,21 @@ class _SettingsPageState extends State<SettingsPage> {
     final userId = prefs.getInt('userId');
 
     try {
-      await UserApi.deleteUser(userId!);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Account deleted successfully')),
-      );
-      await prefs.clear();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+      final success = await UserApi.deleteUser(userId!, password); // 비밀번호 전달
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Account deleted successfully')),
+        );
+        await prefs.clear();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to delete account: $e')),
@@ -261,12 +267,25 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _showDeleteAccountConfirmationDialog() {
+    TextEditingController _passwordConfirmController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('계정 삭제'),
-          content: Text('정말 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('계정을 삭제하려면 비밀번호를 입력하십시오. 이 작업은 되돌릴 수 없습니다.'),
+              SizedBox(height: 10),
+              TextField(
+                controller: _passwordConfirmController,
+                decoration: InputDecoration(labelText: '비밀번호 입력'),
+                obscureText: true,
+              ),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -276,7 +295,13 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             TextButton(
               onPressed: () {
-                _deleteAccount();
+                if (_passwordConfirmController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('비밀번호를 입력해야 합니다.')),
+                  );
+                  return;
+                }
+                _deleteAccount(_passwordConfirmController.text); // 비밀번호 전달
                 Navigator.of(context).pop();
               },
               child: Text('삭제'),

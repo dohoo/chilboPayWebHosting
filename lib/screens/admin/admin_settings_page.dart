@@ -254,13 +254,20 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
 
   void _changePassword(String oldPassword, String newPassword) async {
     try {
-      await AdminApi.changePassword(oldPassword, newPassword);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('userId'); // userId 가져오기
+
+      if (userId == null) {
+        throw Exception('User ID not found');
+      }
+
+      await AdminApi.changePassword(userId, oldPassword, newPassword); // userId 전달
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Password changed successfully')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error changing password: $e')),
+        SnackBar(content: Text('Error changing password: ${e.toString()}')),
       );
     }
   }
