@@ -194,9 +194,18 @@ class HomePageState extends State<HomePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '내 계좌',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                    Row(
+                      children: [
+                        Text(
+                          '내 계좌',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.refresh, color: Colors.black),
+                          onPressed: refreshData,
+                          tooltip: 'Refresh Account Info',
+                        ),
+                      ],
                     ),
                     Text(
                       '$username님',

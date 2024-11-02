@@ -12,7 +12,8 @@ class TransactionPage extends StatefulWidget {
 
 class TransactionPageState extends State<TransactionPage> {
   List transactions = [];
-  int itemsToShow = 10; // 초기 표시 개수
+  int itemsToShow = 10;
+  int? userId; // userId를 클래스 변수로 선언
 
   @override
   void initState() {
@@ -20,14 +21,13 @@ class TransactionPageState extends State<TransactionPage> {
     _fetchTransactions();
   }
 
-  // 데이터를 새로 불러오는 메서드 추가
   Future<void> refreshData() async {
     await _fetchTransactions();
   }
 
   Future<void> _fetchTransactions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('userId');
+    userId = prefs.getInt('userId'); // userId를 클래스 변수에 저장
 
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -37,7 +37,7 @@ class TransactionPageState extends State<TransactionPage> {
     }
 
     try {
-      final data = await UserApi.fetchTransactions(userId);
+      final data = await UserApi.fetchTransactions(userId!);
       setState(() {
         transactions = data;
       });
@@ -50,17 +50,30 @@ class TransactionPageState extends State<TransactionPage> {
 
   void _loadMore() {
     setState(() {
-      itemsToShow += 10; // 표시 개수를 10개씩 증가
+      itemsToShow += 10;
     });
   }
 
   String _formatDate(String utcDate) {
     try {
-      DateTime dateTime = DateTime.parse(utcDate).add(Duration(hours: -9)); // KST 시간대로 변환
-      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime); // 원하는 형식으로 날짜 포맷팅
+      DateTime dateTime = DateTime.parse(utcDate).add(Duration(hours: -9));
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
     } catch (e) {
-      return utcDate; // 변환 실패 시 원본 반환
+      return utcDate;
     }
+  }
+
+  String _getAmountDisplay(double amount, bool isFestivalSender, bool isAdminSender, bool isFestivalReceiver, bool isAdminReceiver) {
+    String prefix = '';
+
+    // festival 또는 admin 역할에 따라 접두사 및 기호 설정
+    if (isFestivalSender || isAdminSender) {
+      prefix = '+';
+    } else if (isFestivalReceiver || isAdminReceiver) {
+      prefix = '-';
+    }
+
+    return '$prefix${amount.toStringAsFixed(0)} P';  // 소수점 표시 제거
   }
 
   @override
@@ -75,32 +88,41 @@ class TransactionPageState extends State<TransactionPage> {
           children: [
             Expanded(
               child: RefreshIndicator(
-                onRefresh: _fetchTransactions, // 아래로 당길 때 거래 내역 새로고침
+                onRefresh: _fetchTransactions,
                 child: transactions.isEmpty
                     ? Center(child: Text('거래 내역이 없습니다.'))
                     : ListView.builder(
                   itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
                   itemBuilder: (context, index) {
                     final transaction = transactions[index];
-                    final String sender = transaction['sender'] == null ? '알 수 없음' : transaction['sender'].toString();
-                    final String receiver = transaction['receiver'] == null ? '알 수 없음' : transaction['receiver'].toString();
-                    final String date = _formatDate(transaction['date']); // 한국 시간으로 포맷
+                    final String sender = transaction['sender'] ?? '알 수 없음';
+                    final String receiver = transaction['receiver'] ?? '알 수 없음';
+                    final String date = _formatDate(transaction['date']);
 
-                    // amount를 안전하게 double로 변환
+                    // amount 변환
                     double amount;
                     try {
                       amount = double.parse(transaction['amount'].toString());
                     } catch (e) {
-                      amount = 0.0; // 변환 실패 시 기본값 사용
+                      amount = 0.0;
                     }
+
+                    // festival 및 admin 역할 확인
+                    bool isFestivalSender = transaction['senderRole'] == 'festival';
+                    bool isAdminSender = transaction['senderRole'] == 'admin';
+                    bool isFestivalReceiver = transaction['receiverRole'] == 'festival';
+                    bool isAdminReceiver = transaction['receiverRole'] == 'admin';
+
+                    // 역할 및 금액 방향에 따른 표시 설정
+                    String amountDisplay = _getAmountDisplay(amount, isFestivalSender, isAdminSender, isFestivalReceiver, isAdminReceiver);
 
                     return ListTile(
                       title: Text('$sender → $receiver'),
                       subtitle: Text(date),
                       trailing: Text(
-                        '${amount.toStringAsFixed(2)} P',
+                        amountDisplay,
                         style: TextStyle(
-                          color: amount < 0 ? Colors.red : Colors.green,
+                          color: amountDisplay.startsWith('-') ? Colors.red : Colors.green,
                         ),
                       ),
                     );
