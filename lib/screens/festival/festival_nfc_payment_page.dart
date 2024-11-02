@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import '../../services/festival_api.dart';
-import 'payment_success_page.dart'; // 결제 성공 페이지 import
+import 'payment_success_page.dart';
 
 class FestivalNfcPaymentPage extends StatefulWidget {
   final int productId;
   final int festivalId;
+  final bool isActivity;
 
-  FestivalNfcPaymentPage({required this.productId, required this.festivalId});
+  FestivalNfcPaymentPage({
+    required this.productId,
+    required this.festivalId,
+    required this.isActivity, // 추가된 isActivity 파라미터
+  });
 
   @override
   _FestivalNfcPaymentPageState createState() => _FestivalNfcPaymentPageState();
@@ -28,10 +33,9 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
       final userData = await FestivalApi.getUserIdByCard(tag.id);
       final int userId = userData['userId'];
 
-      final result = await FestivalApi.processNfcPayment(userId, widget.productId, widget.festivalId);
+      final result = await FestivalApi.processNfcPayment(userId, widget.productId, widget.festivalId, widget.isActivity);
 
       if (result['success']) {
-        // 결제가 성공하면 성공 페이지로 이동
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
@@ -46,7 +50,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
         message = 'Payment failed: $e';
       });
     } finally {
-      await FlutterNfcKit.finish(); // NFC 처리 종료
+      await FlutterNfcKit.finish();
       setState(() {
         isLoading = false;
       });

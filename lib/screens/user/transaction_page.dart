@@ -4,11 +4,13 @@ import '../../services/user_api.dart';
 import 'package:intl/intl.dart';
 
 class TransactionPage extends StatefulWidget {
+  TransactionPage({Key? key}) : super(key: key);
+
   @override
-  _TransactionPageState createState() => _TransactionPageState();
+  TransactionPageState createState() => TransactionPageState();
 }
 
-class _TransactionPageState extends State<TransactionPage> {
+class TransactionPageState extends State<TransactionPage> {
   List transactions = [];
   int itemsToShow = 10; // 초기 표시 개수
 
@@ -18,13 +20,18 @@ class _TransactionPageState extends State<TransactionPage> {
     _fetchTransactions();
   }
 
+  // 데이터를 새로 불러오는 메서드 추가
+  Future<void> refreshData() async {
+    await _fetchTransactions();
+  }
+
   Future<void> _fetchTransactions() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('userId');
 
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User ID not found')),
+        SnackBar(content: Text('User ID를 찾을 수 없습니다.')),
       );
       return;
     }
@@ -36,7 +43,7 @@ class _TransactionPageState extends State<TransactionPage> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load transactions: $e')),
+        SnackBar(content: Text('거래 내역을 불러올 수 없습니다: $e')),
       );
     }
   }
@@ -49,8 +56,8 @@ class _TransactionPageState extends State<TransactionPage> {
 
   String _formatDate(String utcDate) {
     try {
-      DateTime dateTime = DateTime.parse(utcDate).add(Duration(hours: -9)); // KST 시간대로 강제 변환
-      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime); // 원하는 형식으로 날짜를 포맷팅
+      DateTime dateTime = DateTime.parse(utcDate).add(Duration(hours: -9)); // KST 시간대로 변환
+      return DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime); // 원하는 형식으로 날짜 포맷팅
     } catch (e) {
       return utcDate; // 변환 실패 시 원본 반환
     }
@@ -60,7 +67,7 @@ class _TransactionPageState extends State<TransactionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Transaction History'),
+        title: Text('거래 내역'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -68,9 +75,9 @@ class _TransactionPageState extends State<TransactionPage> {
           children: [
             Expanded(
               child: RefreshIndicator(
-                onRefresh: _fetchTransactions, // 아래로 당길 때 트랜잭션 새로고침
+                onRefresh: _fetchTransactions, // 아래로 당길 때 거래 내역 새로고침
                 child: transactions.isEmpty
-                    ? Center(child: Text('No transaction history available'))
+                    ? Center(child: Text('거래 내역이 없습니다.'))
                     : ListView.builder(
                   itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
                   itemBuilder: (context, index) {
@@ -104,7 +111,7 @@ class _TransactionPageState extends State<TransactionPage> {
             if (itemsToShow < transactions.length)
               ElevatedButton(
                 onPressed: _loadMore,
-                child: Text('Load More'),
+                child: Text('더 보기'),
               ),
           ],
         ),

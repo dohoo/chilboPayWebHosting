@@ -7,29 +7,51 @@ import '../../services/user_api.dart';
 import '../login/login_page.dart';
 
 class HomePage extends StatefulWidget {
+  HomePage({Key? key}) : super(key: key);
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   String username = '';
   int money = 0;
   String qrData = '';
   Timer? _timer;
   int remainingTime = 60;
+  bool _needsQrRefresh = false; // HomePage로 돌아올 때 QR 갱신이 필요한지 추적
+  bool isPageActive = true; // 페이지가 활성화된 상태인지 추적
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
-    _loadQrData(); // QR 데이터를 SharedPreferences에서 로드
-    _startQrTimer();
+    _loadQrData();
+    _startQrTimer(); // 타이머 시작
   }
 
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  // HomePage로 돌아올 때 QR을 갱신하는 메서드
+  void onReturnToHomePage() {
+    isPageActive = true;
+    if (_needsQrRefresh) {
+      _generateQrCode();
+      _needsQrRefresh = false;
+    }
+  }
+
+  // HomePage에서 벗어날 때 호출하여 상태 업데이트
+  void onLeaveHomePage() {
+    isPageActive = false;
+  }
+
+  Future<void> refreshData() async {
+    await _fetchUserData();
+    await _checkQrCode();
   }
 
   Future<void> _logout() async {
@@ -56,7 +78,6 @@ class _HomePageState extends State<HomePage> {
         username = userData['username'];
         money = (userData['money'] as num).toInt();
       });
-      await _checkQrCode(userId); // username이 로드된 후 QR 코드 체크
     } catch (e) {
       print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -76,26 +97,27 @@ class _HomePageState extends State<HomePage> {
         qrData = savedQrData;
         remainingTime = 60 - ((currentTime - lastGeneratedTime) ~/ 1000);
       });
+    } else {
+      await _generateQrCode();
     }
   }
 
-  Future<void> _checkQrCode(int userId) async {
+  Future<void> _checkQrCode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final lastGeneratedTime = prefs.getInt('lastQrGeneratedTime') ?? 0;
     final currentTime = DateTime.now().millisecondsSinceEpoch;
 
     if ((currentTime - lastGeneratedTime) >= 60000) {
-      await _generateQrCode(userId); // 60초 이상 경과 시 새로 QR 생성
-    } else {
-      setState(() {
-        remainingTime = 60 - ((currentTime - lastGeneratedTime) ~/ 1000);
-      });
+      await _generateQrCode();
     }
   }
 
-  Future<void> _generateQrCode(int userId) async {
+  Future<void> _generateQrCode() async {
     try {
-      final token = await UserApi.generateQrToken(userId); // 서버에서 토큰 생성 요청
+      final userId = await SharedPreferences.getInstance().then((prefs) => prefs.getInt('userId'));
+      if (userId == null) return;
+
+      final token = await UserApi.generateQrToken(userId);
       final currentTime = DateTime.now().millisecondsSinceEpoch;
 
       setState(() {
@@ -104,33 +126,29 @@ class _HomePageState extends State<HomePage> {
       });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('qrData', token); // QR 데이터를 저장
-      await prefs.setInt('lastQrGeneratedTime', currentTime); // 생성 시간 기록
+      await prefs.setString('qrData', token);
+      await prefs.setInt('lastQrGeneratedTime', currentTime);
     } catch (e) {
       print('Error generating QR token: $e');
     }
   }
 
   void _startQrTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         if (remainingTime > 1) {
           remainingTime -= 1;
         } else {
-          _timer?.cancel(); // 기존 타이머 중지
-          _refreshQrCode(); // QR 코드 갱신
+          remainingTime = 60;
+          if (isPageActive) {
+            _generateQrCode(); // 페이지가 활성화 상태일 때 즉시 갱신
+          } else {
+            _needsQrRefresh = true; // 페이지가 비활성화 상태일 경우 갱신 플래그 설정
+          }
         }
       });
     });
-  }
-
-  Future<void> _refreshQrCode() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('userId');
-    if (userId != null) {
-      await _generateQrCode(userId); // 새 QR 코드 생성
-      _startQrTimer(); // 타이머 초기화 후 재시작
-    }
   }
 
   @override

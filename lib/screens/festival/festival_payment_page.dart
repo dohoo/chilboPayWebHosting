@@ -70,6 +70,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
                       builder: (context) => FestivalQrPaymentPage(
                         productId: itemId,
                         festivalId: festivalId,
+                        isActivity: isActivity, // isActivity 파라미터 추가
                       ),
                     ),
                   );
@@ -85,6 +86,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
                       builder: (context) => FestivalNfcPaymentPage(
                         productId: itemId,
                         festivalId: festivalId,
+                        isActivity: isActivity, // isActivity 파라미터 추가
                       ),
                     ),
                   );

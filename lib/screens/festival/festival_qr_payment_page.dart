@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../services/festival_api.dart';
-import 'payment_success_page.dart'; // 결제 완료 페이지 import
+import 'payment_success_page.dart';
 
 class FestivalQrPaymentPage extends StatefulWidget {
   final int productId;
   final int festivalId;
+  final bool isActivity;
 
-  FestivalQrPaymentPage({required this.productId, required this.festivalId});
+  FestivalQrPaymentPage({
+    required this.productId,
+    required this.festivalId,
+    required this.isActivity, // 추가된 isActivity 파라미터
+  });
 
   @override
   _FestivalQrPaymentPageState createState() => _FestivalQrPaymentPageState();
@@ -45,9 +50,8 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
       });
 
       try {
-        final result = await FestivalApi.processQrPaymentWithToken(token, widget.productId);
+        final result = await FestivalApi.processQrPaymentWithToken(token, widget.productId, widget.isActivity);
         if (result['success']) {
-          // 결제가 성공하면 결제 완료 페이지로 이동
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => PaymentSuccessPage()),

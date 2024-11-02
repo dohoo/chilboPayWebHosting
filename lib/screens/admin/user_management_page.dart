@@ -27,14 +27,13 @@ class _UserManagementPageState extends State<UserManagementPage> {
       final data = await AdminApi.fetchUsers();
       setState(() {
         users = data;
-        displayedUsers = users.take(displayedCount).toList();
+        _updateDisplayedUsers();
       });
     } catch (e) {
       print('Error fetching users: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load users: $e')),
       );
-      await _logout();
     }
   }
 
@@ -45,6 +44,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
       displayedUsers.clear();
     });
     await _fetchUsers();
+  }
+
+  void _updateDisplayedUsers() {
+    setState(() {
+      displayedUsers = users.where((user) => user['role'] == _selectedRole).take(displayedCount).toList();
+    });
   }
 
   void _showUserOptionsDialog(Map<String, dynamic> user) {
@@ -217,69 +222,18 @@ class _UserManagementPageState extends State<UserManagementPage> {
     );
   }
 
-  void _showLogoutConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Logout'),
-          content: Text('Are you sure you want to logout?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                _logout();
-                Navigator.of(context).pop();
-              },
-              child: Text('Logout'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _logout() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
-    } catch (e) {
-      print('Error logging out: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to logout')),
-      );
-    }
-  }
-
   void _loadMoreUsers() {
     setState(() {
       displayedCount += 10;
-      displayedUsers = users.take(displayedCount).toList();
+      _updateDisplayedUsers();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredUsers = displayedUsers.where((user) => user['role'] == _selectedRole).toList();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('User Management'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _showLogoutConfirmationDialog,
-          ),
-        ],
       ),
       body: Column(
         children: <Widget>[
@@ -290,6 +244,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 onPressed: () {
                   setState(() {
                     _selectedRole = 'user';
+                    displayedCount = 10;
+                    _updateDisplayedUsers();
                   });
                 },
                 child: Text('Users', style: TextStyle(color: _selectedRole == 'user' ? Colors.blue : Colors.grey)),
@@ -298,6 +254,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 onPressed: () {
                   setState(() {
                     _selectedRole = 'festival';
+                    displayedCount = 10;
+                    _updateDisplayedUsers();
                   });
                 },
                 child: Text('Clubs', style: TextStyle(color: _selectedRole == 'festival' ? Colors.blue : Colors.grey)),
@@ -308,10 +266,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
             child: RefreshIndicator(
               onRefresh: _refreshUsers,
               child: ListView.builder(
-                itemCount: filteredUsers.length + 1,
+                itemCount: displayedUsers.length + 1,
                 itemBuilder: (context, index) {
-                  if (index == filteredUsers.length) {
-                    return (displayedCount < users.length)
+                  if (index == displayedUsers.length) {
+                    return (displayedCount < users.where((user) => user['role'] == _selectedRole).length)
                         ? TextButton(
                       onPressed: _loadMoreUsers,
                       child: Text("Load More"),
@@ -319,7 +277,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                         : Container();
                   }
 
-                  final user = filteredUsers[index];
+                  final user = displayedUsers[index];
                   return ListTile(
                     title: Text(user['username']),
                     subtitle: Row(
