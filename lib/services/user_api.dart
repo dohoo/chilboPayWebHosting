@@ -7,7 +7,7 @@ class UserApi {
     'Content-Type': 'application/json; charset=UTF-8',
   };
 
-  // Fetch user data by userId
+  // 사용자 데이터를 가져오는 메서드
   static Future<Map<String, dynamic>> fetchUserData(int userId) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/user/$userId'));
@@ -23,13 +23,15 @@ class UserApi {
     }
   }
 
-  // Update user with optional parameters for username, password, and money
-  static Future<void> updateUser(int userId, {String? username, String? password, int? money}) async {
+  // 사용자 업데이트 (username, password, money, currentPassword 옵션)
+  static Future<void> updateUser(
+      int userId, {String? username, String? password, int? money, String? currentPassword}) async {
     Map<String, dynamic> body = {};
 
     if (username != null) body['username'] = username;
     if (password != null) body['password'] = password;
     if (money != null) body['money'] = money;
+    if (currentPassword != null) body['currentPassword'] = currentPassword; // currentPassword 추가
 
     try {
       final response = await http.put(
@@ -47,7 +49,7 @@ class UserApi {
     }
   }
 
-  // Fetch user transactions by userId
+  // 트랜잭션 가져오기
   static Future<List<dynamic>> fetchTransactions(int userId) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/transactions/$userId'));
@@ -109,7 +111,7 @@ class UserApi {
     }
   }
 
-  // Delete user account
+  // 사용자 계정 삭제 메서드
   static Future<void> deleteUser(int userId) async {
     try {
       final response = await http.delete(Uri.parse('$baseUrl/user/$userId'));
@@ -123,7 +125,7 @@ class UserApi {
     }
   }
 
-  // QR 토큰 생성 API
+  // QR 토큰 생성 메서드
   static Future<String> generateQrToken(int userId) async {
     try {
       final response = await http.post(
@@ -143,7 +145,7 @@ class UserApi {
     }
   }
 
-// 사용자 이름으로 수신자 정보 가져오기
+  // 사용자 이름으로 수신자 정보 가져오기
   static Future<Map<String, dynamic>?> fetchUserDataByUsername(String username) async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/user/by-username/$username'));
@@ -177,6 +179,4 @@ class UserApi {
       throw Exception('Error creating transaction: $e');
     }
   }
-
-
 }

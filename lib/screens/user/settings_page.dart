@@ -15,6 +15,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController = TextEditingController(); // 현재 비밀번호 컨트롤러 추가
   String username = '';
   String nfcCardId = '';
   bool isSuspended = false;
@@ -49,7 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  Future<void> _updateUser({String? newUsername, String? newPassword}) async {
+  Future<void> _updateUser({String? newUsername, String? newPassword, String? currentPassword}) async {
     if (isSuspended) {
       _showSuspendedMessage();
       return;
@@ -59,9 +60,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final userId = prefs.getInt('userId');
 
     try {
-      await UserApi.updateUser(userId!,
+      await UserApi.updateUser(
+        userId!,
         username: newUsername,
         password: newPassword,
+        currentPassword: currentPassword,
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('User updated successfully')),
@@ -70,10 +73,17 @@ class _SettingsPageState extends State<SettingsPage> {
       _usernameController.clear();
       _passwordController.clear();
       _confirmPasswordController.clear();
+      _currentPasswordController.clear(); // 현재 비밀번호 입력 필드 초기화
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update user: $e')),
-      );
+      if (e.toString().contains('Current password is incorrect')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('현재 비밀번호가 일치하지 않습니다.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update user: $e')),
+        );
+      }
     }
   }
 
@@ -124,24 +134,43 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Update Username'),
-          content: TextField(
-            controller: _usernameController,
-            decoration: InputDecoration(labelText: 'New Username'),
+          title: Text('아이디 변경'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(labelText: '새 아이디'),
+              ),
+              TextField(
+                controller: _currentPasswordController,
+                decoration: InputDecoration(labelText: '현재 비밀번호'),
+                obscureText: true,
+              ),
+            ],
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
-                _updateUser(newUsername: _usernameController.text);
+                if (_currentPasswordController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('현재 비밀번호를 입력해야 합니다.')),
+                  );
+                  return;
+                }
+                _updateUser(
+                  newUsername: _usernameController.text,
+                  currentPassword: _currentPasswordController.text,
+                );
                 Navigator.of(context).pop();
               },
-              child: Text('Update'),
+              child: Text('변경'),
             ),
           ],
         );
@@ -154,18 +183,23 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Update Password'),
+          title: Text('비밀번호 변경'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
+                controller: _currentPasswordController,
+                decoration: InputDecoration(labelText: '현재 비밀번호'),
+                obscureText: true,
+              ),
+              TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'New Password'),
+                decoration: InputDecoration(labelText: '새 비밀번호'),
                 obscureText: true,
               ),
               TextField(
                 controller: _confirmPasswordController,
-                decoration: InputDecoration(labelText: 'Confirm New Password'),
+                decoration: InputDecoration(labelText: '새 비밀번호 확인'),
                 obscureText: true,
               ),
             ],
@@ -175,20 +209,23 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 if (_passwordController.text == _confirmPasswordController.text) {
-                  _updateUser(newPassword: _passwordController.text);
+                  _updateUser(
+                    newPassword: _passwordController.text,
+                    currentPassword: _currentPasswordController.text,
+                  );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Passwords do not match')),
+                    SnackBar(content: Text('비밀번호가 일치하지 않습니다')),
                   );
                 }
                 Navigator.of(context).pop();
               },
-              child: Text('Update'),
+              child: Text('변경'),
             ),
           ],
         );
@@ -201,21 +238,21 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Logout'),
-          content: Text('Are you sure you want to logout?'),
+          title: Text('로그아웃'),
+          content: Text('로그아웃 하시겠습니까?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 _logout();
                 Navigator.of(context).pop();
               },
-              child: Text('Logout'),
+              child: Text('로그아웃'),
             ),
           ],
         );
@@ -228,21 +265,21 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Account'),
-          content: Text('Are you sure you want to delete your account? This action cannot be undone.'),
+          title: Text('계정 삭제'),
+          content: Text('정말 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 _deleteAccount();
                 Navigator.of(context).pop();
               },
-              child: Text('Delete'),
+              child: Text('삭제'),
             ),
           ],
         );
@@ -253,9 +290,9 @@ class _SettingsPageState extends State<SettingsPage> {
   // 버튼 스타일 지정
   final ButtonStyle commonButtonStyle = TextButton.styleFrom(
     textStyle: TextStyle(
-        fontSize: 16,
-        fontFamily: 'SUIT',
-        fontWeight: FontWeight.w500,
+      fontSize: 16,
+      fontFamily: 'SUIT',
+      fontWeight: FontWeight.w500,
     ),
   );
 
@@ -270,7 +307,6 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // 상단 이름 섹션
             Text(
               '$username님',
               style: TextStyle(
@@ -281,7 +317,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             SizedBox(height: 15.0,),
             Divider(thickness: 1, color: Colors.grey),
-            // NFC 카드 등록 / 해지
             TextButton(
               onPressed: isSuspended
                   ? _showSuspendedMessage
@@ -294,14 +329,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         : NfcUnregisterPage(),
                   ),
                 ).then((value) {
-                  _fetchUserData(); // NFC 카드 등록/해지 후 사용자 정보 새로고침
+                  _fetchUserData();
                 });
               },
               style: commonButtonStyle,
               child: Text(nfcCardId.isEmpty ? '카드 연동' : '카드 연동 해지'),
             ),
             Divider(thickness: 1, color: Colors.grey),
-            // 계정 관리 섹션
             TextButton(
               onPressed: isSuspended ? _showSuspendedMessage : _showUpdateUsernameDialog,
               style: commonButtonStyle,
@@ -313,7 +347,6 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Text('비밀번호 변경'),
             ),
             Divider(thickness: 1, color: Colors.grey),
-            // 개인정보 처리 방침
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -324,7 +357,6 @@ class _SettingsPageState extends State<SettingsPage> {
               style: commonButtonStyle,
               child: Text('개인정보 처리 방침'),
             ),
-            // 기타 설정 섹션
             TextButton(
               onPressed: _showLogoutConfirmationDialog,
               style: commonButtonStyle,
