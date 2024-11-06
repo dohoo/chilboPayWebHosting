@@ -72,11 +72,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   // UTC 날짜 문자열을 DateTime으로 변환 후 KST로 변환
                   final DateTime kstDate = _convertToKST(transaction['date']);
 
+                  // Type 필드가 없을 경우 "알 수 없음"으로 표시
+                  final String type = transaction['type']?.toString() ?? '알 수 없음';
+
+                  // 양수인 경우 '+' 표시 추가
+                  final String amountDisplay = (amount > 0 ? '+' : '') + formatCurrency.format(amount);
+
                   return ListTile(
                     title: Text('$sender -> $receiver'),
                     subtitle: Text(formatDate.format(kstDate)), // 한국 시간대로 변환된 시간 표시
                     trailing: Text(
-                      formatCurrency.format(amount),
+                      '$type $amountDisplay',
                       style: TextStyle(
                         color: amount < 0 ? Colors.red : Colors.green,
                       ),

@@ -39,8 +39,14 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
       }
       final receiverId = receiverData['id'];
 
-      // 트랜잭션 생성
-      final transactionResponse = await UserApi.createTransaction(senderId, receiverId, amount.toDouble());
+      // 트랜잭션 생성 with type "transfer"
+      final transactionResponse = await UserApi.createTransaction(
+          senderId,
+          receiverId,
+          amount.toDouble(),
+          type: 'transfer' // Specify type as "transfer"
+      );
+
       if (transactionResponse) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Transaction successful')),

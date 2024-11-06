@@ -63,17 +63,19 @@ class TransactionPageState extends State<TransactionPage> {
     }
   }
 
-  String _getAmountDisplay(double amount, bool isFestivalSender, bool isAdminSender, bool isFestivalReceiver, bool isAdminReceiver) {
+  String _getAmountDisplay(double amount, String type, bool isFestivalSender, bool isAdminSender, bool isFestivalReceiver, bool isAdminReceiver) {
     String prefix = '';
 
-    // festival 또는 admin 역할에 따라 접두사 및 기호 설정
-    if (isFestivalSender || isAdminSender) {
-      prefix = '+';
-    } else if (isFestivalReceiver || isAdminReceiver) {
-      prefix = '-';
+    // Only add prefix if the type is not 'admin'
+    if (type != 'admin') {
+      if (isFestivalSender || isAdminSender) {
+        prefix = '+';
+      } else if (isFestivalReceiver || isAdminReceiver) {
+        prefix = '-';
+      }
     }
 
-    return '$prefix${amount.toStringAsFixed(0)} P';  // 소수점 표시 제거
+    return '[$type] $prefix${amount.toStringAsFixed(0)} P';  // Remove decimal places
   }
 
   @override
@@ -113,8 +115,11 @@ class TransactionPageState extends State<TransactionPage> {
                     bool isFestivalReceiver = transaction['receiverRole'] == 'festival';
                     bool isAdminReceiver = transaction['receiverRole'] == 'admin';
 
+                    // type 가져오기
+                    String type = transaction['type'] ?? 'N/A';
+
                     // 역할 및 금액 방향에 따른 표시 설정
-                    String amountDisplay = _getAmountDisplay(amount, isFestivalSender, isAdminSender, isFestivalReceiver, isAdminReceiver);
+                    String amountDisplay = _getAmountDisplay(amount, type, isFestivalSender, isAdminSender, isFestivalReceiver, isAdminReceiver);
 
                     return ListTile(
                       title: Text('$sender → $receiver'),
@@ -122,7 +127,7 @@ class TransactionPageState extends State<TransactionPage> {
                       trailing: Text(
                         amountDisplay,
                         style: TextStyle(
-                          color: amountDisplay.startsWith('-') ? Colors.red : Colors.green,
+                          color: amountDisplay.contains('-') ? Colors.red : Colors.green,
                         ),
                       ),
                     );

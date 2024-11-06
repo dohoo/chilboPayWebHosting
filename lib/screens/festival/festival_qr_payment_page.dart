@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../services/festival_api.dart';
 import 'payment_success_page.dart';
+import 'payment_failed_page.dart';
 
 class FestivalQrPaymentPage extends StatefulWidget {
   final int productId;
@@ -11,7 +12,7 @@ class FestivalQrPaymentPage extends StatefulWidget {
   FestivalQrPaymentPage({
     required this.productId,
     required this.festivalId,
-    required this.isActivity, // 추가된 isActivity 파라미터
+    required this.isActivity,
   });
 
   @override
@@ -50,21 +51,38 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
       });
 
       try {
-        final result = await FestivalApi.processQrPaymentWithToken(token, widget.productId, widget.isActivity);
+        final result = await FestivalApi.processQrPaymentWithToken(
+          token,
+          widget.productId,
+          widget.isActivity,
+        );
+
         if (result['success']) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
           );
         } else {
-          setState(() {
-            message = result['message'];
-          });
+          // Navigate to PaymentFailedPage with the error message
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentFailedPage(
+                errorMessage: result['message'] ?? 'Payment failed for unknown reasons',
+              ),
+            ),
+          );
         }
       } catch (e) {
-        setState(() {
-          message = 'Failed to pay with QR code: $e';
-        });
+        // Handle QR payment failure
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentFailedPage(
+              errorMessage: 'Failed to pay with QR code: $e',
+            ),
+          ),
+        );
       } finally {
         setState(() {
           isProcessing = false;

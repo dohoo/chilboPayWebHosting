@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import '../../services/admin_api.dart';
 import 'payment_complete_page.dart'; // 결제 완료 페이지 import
+import 'payment_failed_page.dart';
 
 class QrPaymentPage extends StatefulWidget {
   final List<Map<String, dynamic>> selectedProducts;
@@ -53,19 +54,29 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
             if (!result['success']) {
               setState(() {
                 message = result['message'];
-                isProcessing = false; // 결제 실패 시 로딩 종료
+                isProcessing = false; // End loading on failure
               });
+              // Navigate to PaymentFailedPage with the error message
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentFailedPage(
+                    errorMessage: result['message'] ?? 'Unknown error occurred',
+                  ),
+                ),
+              );
               controller.resumeCamera();
-              return; // 결제 실패 시 종료
+              return; // Exit on payment failure
             }
           }
         }
 
+        // Payment completed successfully
         setState(() {
           message = 'Payment completed successfully!';
         });
 
-        // 모든 결제가 완료되면 결제 완료 페이지로 이동
+        // Navigate to PaymentCompletePage on success
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -73,12 +84,21 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
           ),
         );
       } catch (e) {
+        // Handle QR payment failure
         setState(() {
-          message = 'Failed to pay with QR code: $e';
+          isProcessing = false;
         });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentFailedPage(
+              errorMessage: 'Failed to pay with QR code: $e',
+            ),
+          ),
+        );
       } finally {
         setState(() {
-          isProcessing = false; // 모든 결제 처리 종료 후 로딩 종료
+          isProcessing = false; // Stop loading after processing
         });
         controller.resumeCamera();
       }

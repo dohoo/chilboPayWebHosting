@@ -166,7 +166,7 @@ class UserApi {
   }
 
   // 송금 트랜잭션 생성
-  static Future<bool> createTransaction(int senderId, int receiverId, double amount) async {
+  static Future<bool> createTransaction(int senderId, int receiverId, double amount, {String type = 'transfer'}) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/transaction'),
@@ -175,6 +175,7 @@ class UserApi {
           'senderId': senderId,
           'receiverId': receiverId,
           'amount': amount,
+          'type': type,
           'userId': senderId,  // checkUserStatus 미들웨어를 위해 userId 추가
         }),
       );

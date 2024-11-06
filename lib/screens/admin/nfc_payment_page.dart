@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import '../../services/admin_api.dart'; // AdminApi import
 import 'payment_complete_page.dart'; // 결제 완료 페이지 import
+import 'payment_failed_page.dart';
 
 class NfcPaymentPage extends StatefulWidget {
   final List<Map<String, dynamic>> selectedProducts;
@@ -18,20 +19,20 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
 
   Future<void> _payNfcCard() async {
     setState(() {
-      isLoading = true; // 로딩 시작
+      isLoading = true; // Start loading
       message = 'Processing payment...';
     });
 
     try {
-      // NFC 태그 대기
+      // Wait for NFC tag
       NFCTag tag = await FlutterNfcKit.poll();
       String cardId = tag.id;
 
-      // 카드 ID로 사용자 확인
+      // Verify user by card ID
       final userData = await AdminApi.fetchUserByCard(cardId);
       final userId = userData['userId'];
 
-      // 선택된 상품 개별 결제 처리
+      // Process payment for each selected product
       for (var product in widget.selectedProducts) {
         final int productId = product['id'];
         final int count = product['count'];
@@ -40,19 +41,28 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
           final result = await AdminApi.processPayment(userId, productId);
           if (!result['success']) {
             setState(() {
-              message = result['message'];
-              isLoading = false; // 결제 실패 시 로딩 종료
+              isLoading = false; // Stop loading on failure
             });
-            return; // 결제 실패 시 종료
+            // Navigate to PaymentFailedPage with error message
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PaymentFailedPage(
+                  errorMessage: result['message'] ?? 'Unknown error occurred',
+                ),
+              ),
+            );
+            return; // Exit on payment failure
           }
         }
       }
 
+      // Payment completed successfully
       setState(() {
         message = 'Payment completed successfully!';
       });
 
-      // 모든 결제가 완료되면 결제 완료 페이지로 이동
+      // Navigate to PaymentCompletePage on success
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -60,13 +70,22 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
         ),
       );
     } catch (e) {
+      // Handle NFC payment failure
       setState(() {
-        message = 'Failed to pay with NFC card: $e';
+        isLoading = false;
       });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentFailedPage(
+            errorMessage: 'Failed to pay with NFC card: $e',
+          ),
+        ),
+      );
     } finally {
-      await FlutterNfcKit.finish(); // NFC 모드 종료
+      await FlutterNfcKit.finish(); // End NFC mode
       setState(() {
-        isLoading = false; // 로딩 종료
+        isLoading = false; // Stop loading
       });
     }
   }
