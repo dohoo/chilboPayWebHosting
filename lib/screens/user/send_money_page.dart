@@ -86,14 +86,23 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
               ],
             ),
             SizedBox(height: 150),
-            TextButton(
-              onPressed: _sendMoney,
-              child: Text('송금하기'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(11.0),
+            SizedBox(
+              width: double.infinity, // 버튼 너비를 화면 전체로 설정
+              child: TextButton(
+                onPressed: _sendMoney,
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFFB8EA92), // 버튼 배경색 설정
+                  padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 설정
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(11.0), // 버튼 모서리 둥글게 설정
+                  ),
+                ),
+                child: Text(
+                  '송금하기',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.black, // 텍스트 색상 설정
+                  ),
                 ),
               ),
             ),

@@ -207,12 +207,19 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 child: TextButton(
                   onPressed: _login,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color(0xFFB8EA92), // 버튼 배경색
+                    padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 조정
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0), // 버튼 모서리 둥글게
+                    ),
+                  ),
                   child: Text(
                     '시작하기',
                     style: TextStyle(
                       fontFamily: 'SUIT-Light',
-                      fontSize: 10.0,
-                      color: Colors.black,
+                      fontSize: 16.0, // 텍스트 크기 증가
+                      color: Colors.black, // 텍스트 색상
                     ),
                   ),
                 ),
