@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
 import '../../services/festival_api.dart';
 import 'payment_success_page.dart';
+import 'payment_failed_page.dart';
 
 class FestivalNfcPaymentPage extends StatefulWidget {
   final int productId;
@@ -11,7 +12,7 @@ class FestivalNfcPaymentPage extends StatefulWidget {
   FestivalNfcPaymentPage({
     required this.productId,
     required this.festivalId,
-    required this.isActivity, // 추가된 isActivity 파라미터
+    required this.isActivity,
   });
 
   @override
@@ -33,7 +34,13 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
       final userData = await FestivalApi.getUserIdByCard(tag.id);
       final int userId = userData['userId'];
 
-      final result = await FestivalApi.processNfcPayment(userId, widget.productId, widget.festivalId, widget.isActivity);
+      // Determine the type based on isActivity flag
+      final result = await FestivalApi.processNfcPayment(
+        userId,
+        widget.productId,
+        widget.festivalId,
+        widget.isActivity,
+      );
 
       if (result['success']) {
         Navigator.pushReplacement(
@@ -41,14 +48,24 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
           MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
         );
       } else {
-        setState(() {
-          message = result['message'];
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentFailedPage(
+              errorMessage: result['message'] ?? 'Payment failed for unknown reasons',
+            ),
+          ),
+        );
       }
     } catch (e) {
-      setState(() {
-        message = 'Payment failed: $e';
-      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentFailedPage(
+            errorMessage: 'Payment failed: $e',
+          ),
+        ),
+      );
     } finally {
       await FlutterNfcKit.finish();
       setState(() {

@@ -68,7 +68,7 @@ class AdminApi {
     }
   }
 
-  // Process NFC payment
+  // Process NFC payment with type "purchase"
   static Future<Map<String, dynamic>> processPayment(int userId, int productId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/purchase'),
@@ -78,6 +78,7 @@ class AdminApi {
       body: jsonEncode(<String, dynamic>{
         'userId': userId,
         'productId': productId,
+        'type': 'purchase', // Specify transaction type as "purchase"
       }),
     );
 
@@ -158,10 +159,14 @@ class AdminApi {
     }
   }
 
-  // Delete user
+  // Delete user (Admin)
   static Future<http.Response> deleteUser(int id) async {
-    return await http.delete(
-      Uri.parse('$baseUrl/user/$id'),
+    return await http.post(
+      Uri.parse('$baseUrl/admin/user/$id/delete'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_ADMIN_TOKEN', // include authorization if required
+      },
     );
   }
 
@@ -234,6 +239,7 @@ class AdminApi {
     }
   }
 
+  // Process NFC payment with token and specify type "purchase"
   static Future<Map<String, dynamic>> processPaymentWithToken(String token, int productId) async {
     final response = await http.post(
       Uri.parse('$baseUrl/purchaseWithToken'),
@@ -241,6 +247,7 @@ class AdminApi {
       body: jsonEncode({
         'token': token,
         'productId': productId,
+        'type': 'purchase' // Specify transaction type as "purchase"
       }),
     );
 

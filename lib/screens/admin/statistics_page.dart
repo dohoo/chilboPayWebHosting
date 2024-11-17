@@ -24,6 +24,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
       setState(() {
         _totalUserMoney = int.parse(totals['totalUserMoney'].toString());
         _totalFestivalMoney = int.parse(totals['totalFestivalMoney'].toString());
+        _errorMessage = ''; // Clear any previous error
       });
     } catch (e) {
       setState(() {
@@ -38,29 +39,38 @@ class _StatisticsPageState extends State<StatisticsPage> {
       appBar: AppBar(
         title: Text('Statistics'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _errorMessage.isEmpty
-                ? Column(
-              children: [
-                Text('Total money of users: $_totalUserMoney'),
-                Text('Total money of festivals: $_totalFestivalMoney'),
-              ],
-            )
-                : Text(_errorMessage),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TransactionsPage()),
-                );
-              },
-              child: Text('View Transactions'),
-            ),
-          ],
+      body: RefreshIndicator(
+        onRefresh: fetchTotalMoney, // Trigger data refresh on pull
+        child: Center(
+          child: ListView(
+            padding: EdgeInsets.all(16.0),
+            children: [
+              _errorMessage.isEmpty
+                  ? Column(
+                children: [
+                  Text('Total money of users: $_totalUserMoney'),
+                  SizedBox(height: 10),
+                  Text('Total money of festivals: $_totalFestivalMoney'),
+                ],
+              )
+                  : Center(
+                child: Text(
+                  _errorMessage,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TransactionsPage()),
+                  );
+                },
+                child: Text('View Transactions'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -90,7 +90,7 @@ class FestivalApi {
     final response = await http.post(
       Uri.parse('$baseUrl/festivalPurchaseWithToken'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode({'token': token, 'productId': productId}),
+      body: jsonEncode({'token': token, 'productId': productId, 'type': 'festival-purchase'}),
     );
 
     if (response.statusCode == 201) {
@@ -106,7 +106,7 @@ class FestivalApi {
     final response = await http.post(
       Uri.parse('$baseUrl/festivalActivityPurchaseWithToken'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode({'token': token, 'activityId': activityId}),
+      body: jsonEncode({'token': token, 'activityId': activityId, 'type': 'festival-activity'}),
     );
 
     if (response.statusCode == 201) {
@@ -129,7 +129,7 @@ class FestivalApi {
     final response = await http.post(
       Uri.parse('$baseUrl/festival-purchase'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode({'userId': userId, 'productId': productId, 'festivalId': festivalId}),
+      body: jsonEncode({'userId': userId, 'productId': productId, 'festivalId': festivalId, 'type': 'festival-purchase'}),
     );
 
     if (response.statusCode == 201) {
@@ -145,7 +145,7 @@ class FestivalApi {
     final response = await http.post(
       Uri.parse('$baseUrl/festivalActivityPurchase'),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
-      body: jsonEncode({'userId': userId, 'activityId': activityId, 'festivalId': festivalId}),
+      body: jsonEncode({'userId': userId, 'activityId': activityId, 'festivalId': festivalId, 'type': 'festival-activity'}),
     );
 
     if (response.statusCode == 201) {

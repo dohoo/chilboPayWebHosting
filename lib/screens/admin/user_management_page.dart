@@ -150,21 +150,37 @@ class _UserManagementPageState extends State<UserManagementPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Account'),
-        content: Text('Are you sure you want to delete this account?'),
+        title: Text('계정 삭제'),
+        content: Text('정말 이 계정을 삭제하시겠습니까?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
+            child: Text('취소'),
           ),
           TextButton(
             onPressed: () async {
-              await AdminApi.deleteUser(userId);
-              _fetchUsers();
+              // 팝업 먼저 닫기
               Navigator.of(context).pop();
-              Navigator.of(context).pop();
+
+              try {
+                final response = await AdminApi.deleteUser(userId);
+                if (response.statusCode == 200) {
+                  _fetchUsers(); // 사용자 목록 다시 불러오기
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('계정이 성공적으로 삭제되었습니다.')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('계정 삭제에 실패했습니다.')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('오류가 발생했습니다: $e')),
+                );
+              }
             },
-            child: Text('Delete'),
+            child: Text('삭제'),
           ),
         ],
       ),

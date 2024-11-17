@@ -13,7 +13,7 @@ class TransactionPage extends StatefulWidget {
 class TransactionPageState extends State<TransactionPage> {
   List transactions = [];
   int itemsToShow = 10;
-  int? userId; // userId를 클래스 변수로 선언
+  int? userId; // shared_preferences에서 가져온 userId를 저장할 변수
 
   @override
   void initState() {
@@ -63,17 +63,19 @@ class TransactionPageState extends State<TransactionPage> {
     }
   }
 
-  String _getAmountDisplay(double amount, bool isFestivalSender, bool isAdminSender, bool isFestivalReceiver, bool isAdminReceiver) {
+  String _getAmountDisplay(double amount, String type, bool isSender, bool isReceiver) {
     String prefix = '';
 
-    // festival 또는 admin 역할에 따라 접두사 및 기호 설정
-    if (isFestivalSender || isAdminSender) {
-      prefix = '+';
-    } else if (isFestivalReceiver || isAdminReceiver) {
+    // type에 따라 접두사 설정
+    if (type == 'transfer') {
+      prefix = isSender ? '-' : isReceiver ? '+' : '';
+    } else if (type == 'festival-purchase' || type == 'purchase') {
       prefix = '-';
+    } else if (type == 'festival-activity') {
+      prefix = '+';
     }
 
-    return '$prefix${amount.toStringAsFixed(0)} P';  // 소수점 표시 제거
+    return '[$type] $prefix${amount.toStringAsFixed(0)} P';  // 소수점 제거
   }
 
   @override
@@ -107,14 +109,27 @@ class TransactionPageState extends State<TransactionPage> {
                       amount = 0.0;
                     }
 
-                    // festival 및 admin 역할 확인
-                    bool isFestivalSender = transaction['senderRole'] == 'festival';
-                    bool isAdminSender = transaction['senderRole'] == 'admin';
-                    bool isFestivalReceiver = transaction['receiverRole'] == 'festival';
-                    bool isAdminReceiver = transaction['receiverRole'] == 'admin';
+                    // transaction에서 type 가져오기
+                    String type = transaction['type'] ?? 'N/A';
+                    bool isSender = transaction['senderId'] == userId;
+                    bool isReceiver = transaction['receiverId'] == userId;
 
-                    // 역할 및 금액 방향에 따른 표시 설정
-                    String amountDisplay = _getAmountDisplay(amount, isFestivalSender, isAdminSender, isFestivalReceiver, isAdminReceiver);
+                    // 표시할 금액 설정
+                    String amountDisplay = _getAmountDisplay(amount, type, isSender, isReceiver);
+
+                    // 색상 설정
+                    Color amountColor;
+                    if (type == 'transfer' && isSender) {
+                      amountColor = Colors.red;
+                    } else if (type == 'transfer' && isReceiver) {
+                      amountColor = Colors.green;
+                    } else if (type == 'festival-activity') {
+                      amountColor = Colors.green;
+                    } else if (type == 'festival-purchase' || type == 'purchase') {
+                      amountColor = Colors.red;
+                    } else {
+                      amountColor = amountDisplay.contains('-') ? Colors.red : Colors.green;
+                    }
 
                     return ListTile(
                       title: Text('$sender → $receiver'),
@@ -122,7 +137,7 @@ class TransactionPageState extends State<TransactionPage> {
                       trailing: Text(
                         amountDisplay,
                         style: TextStyle(
-                          color: amountDisplay.startsWith('-') ? Colors.red : Colors.green,
+                          color: amountColor,
                         ),
                       ),
                     );
