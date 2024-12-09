@@ -14,12 +14,25 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
   List<Map<String, dynamic>> products = [];
   List<Map<String, dynamic>> activities = [];
   bool showProducts = true;
+  int? activityCount; // 남은 횟수를 저장할 변수
 
   @override
   void initState() {
     super.initState();
+    _fetchActivityCount();
     _fetchProducts();
     _fetchActivities();
+  }
+
+  Future<void> _fetchActivityCount() async {
+    try {
+      final user = await FestivalApi.fetchUserData(widget.festivalId);
+      setState(() {
+        activityCount = user['activityCount'];
+      });
+    } catch (e) {
+      print('Failed to fetch activity count: $e');
+    }
   }
 
   Future<void> _fetchProducts() async {
@@ -35,9 +48,15 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
 
   Future<void> _fetchActivities() async {
     try {
-      final fetchedActivities = await FestivalApi.fetchFestivalActivities(widget.festivalId);
+      // fetchFestivalActivities가 이제 Map을 반환합니다.
+      // { "activityCount": int, "activities": [ ... ] }
+      final data = await FestivalApi.fetchFestivalActivities(widget.festivalId);
       setState(() {
-        activities = List<Map<String, dynamic>>.from(fetchedActivities);
+        // 서버 응답에서 activityCount도 여기서 업데이트 할 수 있음
+        if (data['activityCount'] != null) {
+          activityCount = data['activityCount'];
+        }
+        activities = List<Map<String, dynamic>>.from(data['activities']);
       });
     } catch (e) {
       print('Failed to fetch activities: $e');
@@ -47,9 +66,21 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Festival Management')),
+      appBar: AppBar(
+        title: Text('Festival Management'),
+      ),
       body: Column(
         children: [
+          // 남은 횟수 표시 부분
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              activityCount == null
+                  ? 'Loading activity count...'
+                  : '남은 활동 횟수: $activityCount 회',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -64,9 +95,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
             ],
           ),
           Expanded(
-            child: showProducts
-                ? _buildProductList()
-                : _buildActivityList(),
+            child: showProducts ? _buildProductList() : _buildActivityList(),
           ),
         ],
       ),

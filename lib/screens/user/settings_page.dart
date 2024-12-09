@@ -380,7 +380,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
               style: commonButtonStyle,
-              child: Text('개인정보 처리 방침'),
+              child: Text('이용약관'),
             ),
             TextButton(
               onPressed: _showLogoutConfirmationDialog,

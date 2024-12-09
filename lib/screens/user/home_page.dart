@@ -8,6 +8,7 @@ import '../login/login_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
+
   @override
   HomePageState createState() => HomePageState();
 }
@@ -35,13 +36,14 @@ class HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  // HomePage로 돌아올 때 QR을 갱신하는 메서드
+  // HomePage로 돌아올 때 QR을 갱신하고 계좌 정보도 리로드
   void onReturnToHomePage() {
     isPageActive = true;
     if (_needsQrRefresh) {
       _generateQrCode();
       _needsQrRefresh = false;
     }
+    _fetchUserData(); // 계좌 정보 갱신
   }
 
   // HomePage에서 벗어날 때 호출하여 상태 업데이트

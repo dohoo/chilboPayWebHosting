@@ -29,7 +29,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     try {
-      final response = await LoginApi.signUp(  // LoginApi 사용
+      final response = await LoginApi.signUp(
         _usernameController.text,
         _passwordController.text,
       );
@@ -65,9 +65,8 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF2F4F0),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFFF2F4F0),
         title: Text('회원가입'),
       ),
       body: Padding(
@@ -76,16 +75,25 @@ class _SignUpPageState extends State<SignUpPage> {
           children: <Widget>[
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(
+                labelText: 'Username',
+                labelStyle: Theme.of(context).textTheme.bodyMedium, // 최신 스타일
+              ),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                labelStyle: Theme.of(context).textTheme.bodyMedium, // 최신 스타일
+              ),
               obscureText: true,
             ),
             TextField(
               controller: _confirmPasswordController,
-              decoration: InputDecoration(labelText: 'Confirm Password'),
+              decoration: InputDecoration(
+                labelText: 'Confirm Password',
+                labelStyle: Theme.of(context).textTheme.bodyMedium, // 최신 스타일
+              ),
               obscureText: true,
             ),
             SizedBox(height: 20),
@@ -103,12 +111,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   onTap: _navigateToTermsPage,
                   child: Text(
                     '이용약관에 동의합니다(필수)',
-                    style: TextStyle(
-                      //decoration: TextDecoration.underline,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
-                      fontFamily: 'SUIT-ExtraBold',
                       fontSize: 15.0,
-                      color: Color(0xFF3C3C3C),
                     ),
                   ),
                 ),
@@ -117,6 +122,7 @@ class _SignUpPageState extends State<SignUpPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _signUp,
+              style: Theme.of(context).elevatedButtonTheme.style,
               child: Text('Sign Up'),
             ),
           ],

@@ -130,8 +130,15 @@ class AdminApi {
     }
   }
 
-  // Update user
-  static Future<http.Response> updateUser(int id, String username, int money, {String? password, String? status}) async {
+  // Update user (activityCount 추가)
+  static Future<http.Response> updateUser(
+      int id,
+      String username,
+      int money, {
+        String? password,
+        String? status,
+        int? activityCount, // 추가
+      }) async {
     final Map<String, dynamic> payload = {
       'username': username,
       'money': money,
@@ -142,6 +149,9 @@ class AdminApi {
     }
     if (status != null) {
       payload['status'] = status;
+    }
+    if (activityCount != null) {
+      payload['activityCount'] = activityCount; // activityCount 추가
     }
 
     try {
@@ -227,7 +237,7 @@ class AdminApi {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({
-        'userId': userId, // userId 추가
+        'userId': userId,
         'oldPassword': oldPassword,
         'newPassword': newPassword,
       }),
@@ -247,7 +257,7 @@ class AdminApi {
       body: jsonEncode({
         'token': token,
         'productId': productId,
-        'type': 'purchase' // Specify transaction type as "purchase"
+        'type': 'purchase'
       }),
     );
 
@@ -287,15 +297,33 @@ class AdminApi {
     }
   }
 
-// 축제 활동 목록 가져오기
+  // 축제 활동 목록 가져오기
   static Future<List<dynamic>> fetchFestivalActivities(int festivalId) async {
     final response = await http.get(Uri.parse('$baseUrl/festivalActivities?festivalId=$festivalId'));
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+      // data는 { "activityCount": number, "activities": [ ... ] } 형태라고 가정
+      return data['activities']; // 'activities' 키에 해당하는 리스트 반환
     } else {
       throw Exception('Failed to load festival activities');
     }
   }
 
+
+  // Fetch admin password
+  static Future<bool> verifyAdminPassword(String inputPassword) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/verifyAdminPassword'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'password': inputPassword}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['isValid'];
+    } else {
+      throw Exception('Failed to verify password');
+    }
+  }
 }

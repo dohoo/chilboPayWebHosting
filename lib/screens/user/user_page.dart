@@ -13,10 +13,11 @@ class _UserPageState extends State<UserPage> {
   int _selectedIndex = 2;
 
   final GlobalKey<HomePageState> _homePageKey = GlobalKey<HomePageState>();
+  final GlobalKey<TransactionPageState> _transactionPageKey = GlobalKey<TransactionPageState>();
 
   late final List<Widget> _widgetOptions = [
     SendMoneyPage(),
-    TransactionPage(),
+    TransactionPage(key: _transactionPageKey),
     HomePage(key: _homePageKey),
     SettingsPage(),
   ];
@@ -29,6 +30,12 @@ class _UserPageState extends State<UserPage> {
       } else if (_selectedIndex == 2) {
         _homePageKey.currentState?.onLeaveHomePage();
       }
+
+      // TransactionPage로 이동 시 갱신
+      if (index == 1) {
+        _transactionPageKey.currentState?.refreshData();
+      }
+
       _selectedIndex = index;
     });
   }
