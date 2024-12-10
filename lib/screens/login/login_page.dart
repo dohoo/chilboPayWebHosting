@@ -78,154 +78,156 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(  // 배경 색상 변경
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'CHILBO ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'SUIT-Regular',
-                      fontSize: 30.0,
-                      color: Color(0xFF3C3C3C),
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'PAY',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'SUIT-ExtraBold',
-                      fontSize: 30.0,
-                      color: Color(0xFF3C3C3C),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Spacer(flex: 1),
-            Text(
-              '반갑습니다.',
-              style: TextStyle(
-                fontWeight: FontWeight.w300,
-                fontFamily: 'SUIT-ExtraLight',
-                fontSize: 25.0,
-              ),
-            ),
-            SizedBox(height: 40.0),
-            Align(
-              alignment: Alignment.center,
-              child: FractionallySizedBox(
-                widthFactor: 0.8,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text.rich(
+                TextSpan(
                   children: [
-                    Text(
-                      'ID',
+                    TextSpan(
+                      text: 'CHILBO ',
                       style: TextStyle(
-                        fontFamily: 'SUIT-ExtraLight',
-                        fontSize: 18.0,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'SUIT-Regular',
+                        fontSize: 30.0,
+                        color: Color(0xFF3C3C3C),
                       ),
                     ),
-                    TextField(
-                      cursorColor: Colors.black,
-                      controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: '',
-                        hoverColor: Colors.black,
+                    TextSpan(
+                      text: 'PAY',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'SUIT-ExtraBold',
+                        fontSize: 30.0,
+                        color: Color(0xFF3C3C3C),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
 
-            Spacer(flex: 2),
-            Align(
-              alignment: Alignment.center,
-              child: FractionallySizedBox(
-                widthFactor: 0.8,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'PASSWORD',
-                      style: TextStyle(
-                        fontFamily: 'SUIT-ExtraLight',
-                        fontSize: 18.0,
-                      ),
-                    ),
-                    TextField(
-                      controller: _passwordController,
-                      cursorColor: Colors.black,
-                      decoration: InputDecoration(
-                        labelText: '',
-                        hoverColor: Colors.black,
-                      ),
-                      obscureText: true,
-                    ),
-                  ],
+              Spacer(flex: 1),
+              Text(
+                '반갑습니다.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                  fontFamily: 'SUIT-ExtraLight',
+                  fontSize: 25.0,
                 ),
               ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: FractionallySizedBox(
-                widthFactor: 0.8,
-                child: Align(
-                  alignment: Alignment.centerRight,
+              SizedBox(height: 40.0),
+              Align(
+                alignment: Alignment.center,
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ID',
+                        style: TextStyle(
+                          fontFamily: 'SUIT-ExtraLight',
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      TextField(
+                        cursorColor: Colors.black,
+                        controller: _usernameController,
+                        decoration: InputDecoration(
+                          labelText: '',
+                          hoverColor: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              Spacer(flex: 2),
+              Align(
+                alignment: Alignment.center,
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PASSWORD',
+                        style: TextStyle(
+                          fontFamily: 'SUIT-ExtraLight',
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      TextField(
+                        controller: _passwordController,
+                        cursorColor: Colors.black,
+                        decoration: InputDecoration(
+                          labelText: '',
+                          hoverColor: Colors.black,
+                        ),
+                        obscureText: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUpPage()),
+                        );
+                      },
+                      child: Text(
+                        '처음이신가요?',
+                        style: TextStyle(
+                          fontFamily: 'SUIT-ExtraLight',
+                          fontSize: 15.0,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Spacer(flex: 4),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  width: double.infinity,
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUpPage()),
-                      );
-                    },
-                    child: Text(
-                      '처음이신가요?',
-                      style: TextStyle(
-                        fontFamily: 'SUIT-ExtraLight',
-                        fontSize: 15.0,
+                    onPressed: _login,
+                    style: TextButton.styleFrom(
+                      backgroundColor: Color(0xFFB8EA92), // 버튼 배경색
+                      padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 조정
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0), // 버튼 모서리 둥글게
                       ),
                     ),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
+                    child: Text(
+                      '시작하기',
+                      style: TextStyle(
+                        fontFamily: 'SUIT-Light',
+                        fontSize: 16.0, // 텍스트 크기 증가
+                        color: Colors.black, // 텍스트 색상
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Spacer(flex: 4),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: _login,
-                  style: TextButton.styleFrom(
-                    backgroundColor: Color(0xFFB8EA92), // 버튼 배경색
-                    padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 조정
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0), // 버튼 모서리 둥글게
-                    ),
-                  ),
-                  child: Text(
-                    '시작하기',
-                    style: TextStyle(
-                      fontFamily: 'SUIT-Light',
-                      fontSize: 16.0, // 텍스트 크기 증가
-                      color: Colors.black, // 텍스트 색상
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
