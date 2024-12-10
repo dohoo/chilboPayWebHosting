@@ -15,6 +15,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
   late TabController _tabController;
   int? activityCount;
   int festivalId = 1;
+  bool isSuspended = false; // 정지 여부 표시
 
   @override
   void initState() {
@@ -26,9 +27,24 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
   Future<void> _initFetch() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     festivalId = prefs.getInt('festivalId') ?? 1;
+
+    // 유저 정보(정지 여부 포함) 가져오기
+    await _fetchUserStatus();
+
     await _fetchActivityCount();
     await _fetchProducts();
     await _fetchActivities();
+  }
+
+  Future<void> _fetchUserStatus() async {
+    try {
+      final user = await FestivalApi.fetchUserData(festivalId);
+      setState(() {
+        isSuspended = user['status'] == 'suspended';
+      });
+    } catch (e) {
+      print('Failed to fetch user data: $e');
+    }
   }
 
   Future<void> _fetchActivityCount() async {
@@ -36,6 +52,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
       final user = await FestivalApi.fetchUserData(festivalId);
       setState(() {
         activityCount = user['activityCount'];
+        isSuspended = user['status'] == 'suspended';
       });
     } catch (e) {
       print('Failed to fetch activity count: $e');
@@ -68,6 +85,14 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
   }
 
   Future<void> _showPaymentOptionDialog(int itemId, bool isActivity) async {
+    // 계정이 정지된 상태라면 결제 다이얼로그 대신 메시지를 띄우고 중단
+    if (isSuspended) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('계정이 정지되어 결제를 진행할 수 없습니다.')),
+      );
+      return;
+    }
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final festivalId = prefs.getInt('festivalId') ?? 1;
 
@@ -124,6 +149,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
 
   Future<void> _refreshData() async {
     // 결제 완료/실패 화면에서 돌아왔을 때 다시 데이터 Fetch
+    await _fetchUserStatus();
     await _fetchActivityCount();
     await _fetchActivities();
     await _fetchProducts();

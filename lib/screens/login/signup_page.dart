@@ -77,14 +77,14 @@ class _SignUpPageState extends State<SignUpPage> {
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Username',
-                labelStyle: Theme.of(context).textTheme.bodyMedium, // 최신 스타일
+                labelStyle: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
             TextField(
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
-                labelStyle: Theme.of(context).textTheme.bodyMedium, // 최신 스타일
+                labelStyle: Theme.of(context).textTheme.bodyMedium,
               ),
               obscureText: true,
             ),
@@ -92,7 +92,7 @@ class _SignUpPageState extends State<SignUpPage> {
               controller: _confirmPasswordController,
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                labelStyle: Theme.of(context).textTheme.bodyMedium, // 최신 스타일
+                labelStyle: Theme.of(context).textTheme.bodyMedium,
               ),
               obscureText: true,
             ),
@@ -110,10 +110,11 @@ class _SignUpPageState extends State<SignUpPage> {
                 GestureDetector(
                   onTap: _navigateToTermsPage,
                   child: Text(
-                    '이용약관에 동의합니다(필수)',
+                    '이용약관 및 개인정보 처리 방침에 동의합니다(필수)',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
-                      fontSize: 15.0,
+                      fontSize: 11.0,
+                      decoration: TextDecoration.underline, // 밑줄 추가
                     ),
                   ),
                 ),

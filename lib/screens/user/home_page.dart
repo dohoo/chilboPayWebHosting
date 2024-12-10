@@ -21,6 +21,7 @@ class HomePageState extends State<HomePage> {
   int remainingTime = 60;
   bool _needsQrRefresh = false; // HomePage로 돌아올 때 QR 갱신이 필요한지 추적
   bool isPageActive = true; // 페이지가 활성화된 상태인지 추적
+  bool isSuspended = false; // 정지 상태 여부
 
   @override
   void initState() {
@@ -39,21 +40,23 @@ class HomePageState extends State<HomePage> {
   // HomePage로 돌아올 때 QR을 갱신하고 계좌 정보도 리로드
   void onReturnToHomePage() {
     isPageActive = true;
-    if (_needsQrRefresh) {
+    if (_needsQrRefresh && !isSuspended) {
       _generateQrCode();
       _needsQrRefresh = false;
     }
     _fetchUserData(); // 계좌 정보 갱신
   }
 
-  // HomePage에서 벗어날 때 호출하여 상태 업데이트
+  // HomePage에서 벗어날 때
   void onLeaveHomePage() {
     isPageActive = false;
   }
 
   Future<void> refreshData() async {
     await _fetchUserData();
-    await _checkQrCode();
+    if (!isSuspended) {
+      await _checkQrCode();
+    }
   }
 
   Future<void> _logout() async {
@@ -79,7 +82,16 @@ class HomePageState extends State<HomePage> {
       setState(() {
         username = userData['username'];
         money = (userData['money'] as num).toInt();
+        isSuspended = userData['status'] == 'suspended';
       });
+
+      if (!isSuspended) {
+        await _loadQrData();
+        _startQrTimer();
+      } else {
+        // 정지 상태일 경우 QR 타이머 및 생성 중지
+        _timer?.cancel();
+      }
     } catch (e) {
       print('Error fetching user data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,6 +101,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadQrData() async {
+    if (isSuspended) return;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final savedQrData = prefs.getString('qrData') ?? '';
     final lastGeneratedTime = prefs.getInt('lastQrGeneratedTime') ?? 0;
@@ -105,6 +118,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _checkQrCode() async {
+    if (isSuspended) return;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final lastGeneratedTime = prefs.getInt('lastQrGeneratedTime') ?? 0;
     final currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -115,6 +129,7 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _generateQrCode() async {
+    if (isSuspended) return;
     try {
       final userId = await SharedPreferences.getInstance().then((prefs) => prefs.getInt('userId'));
       if (userId == null) return;
@@ -137,16 +152,18 @@ class HomePageState extends State<HomePage> {
 
   void _startQrTimer() {
     _timer?.cancel();
+    if (isSuspended) return;
+
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
         if (remainingTime > 1) {
           remainingTime -= 1;
         } else {
           remainingTime = 60;
-          if (isPageActive) {
+          if (isPageActive && !isSuspended) {
             _generateQrCode(); // 페이지가 활성화 상태일 때 즉시 갱신
           } else {
-            _needsQrRefresh = true; // 페이지가 비활성화 상태일 경우 갱신 플래그 설정
+            _needsQrRefresh = true; // 페이지 비활성 시 갱신 플래그
           }
         }
       });
@@ -159,74 +176,87 @@ class HomePageState extends State<HomePage> {
     final formattedMoney = "${formatCurrency.format(money)}P";
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              flex: 3,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    QrImageView(
-                      data: qrData,
-                      version: QrVersions.auto,
-                      size: 200.0,
-                      backgroundColor: Colors.white,
-                      padding: EdgeInsets.all(10),
-                    ),
-                    SizedBox(height: 10),
-                    Text('$remainingTime초 뒤 재생성'),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFB8EA92),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              margin: EdgeInsets.only(bottom: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      appBar: AppBar(
+        title: Text('결제하기'),
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: isSuspended
+                  ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            '내 계좌',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.refresh, color: Colors.black),
-                            onPressed: refreshData,
-                            tooltip: 'Refresh Account Info',
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '$username님',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                      ),
-                    ],
+                  Icon(Icons.block, size: 100, color: Colors.red),
+                  SizedBox(height: 20),
+                  Text(
+                    '계정이 정지되었습니다.',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              )
+                  : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  QrImageView(
+                    data: qrData,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                    backgroundColor: Colors.white,
+                    padding: EdgeInsets.all(10),
                   ),
                   SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Text(
-                      formattedMoney,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                  ),
+                  Text('$remainingTime초 뒤 재생성'),
                 ],
               ),
             ),
-          ],
-        ),
-      )
+          ),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFB8EA92),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.only(bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '내 계좌',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.refresh, color: Colors.black),
+                          onPressed: refreshData,
+                          tooltip: 'Refresh Account Info',
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '$username님',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    formattedMoney,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
