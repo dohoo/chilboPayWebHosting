@@ -69,52 +69,51 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Send Money'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            SizedBox(height: 100),
-            TextField(
-              controller: _receiverController,
-              decoration: InputDecoration(labelText: '받는 사람'),
-            ),
-            SizedBox(height: 50),
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(labelText: '금액'),
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-                NoNegativeNumberFormatter(),
-              ],
-            ),
-            SizedBox(height: 150),
-            SizedBox(
-              width: double.infinity, // 버튼 너비를 화면 전체로 설정
-              child: TextButton(
-                onPressed: _sendMoney,
-                style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFFB8EA92), // 버튼 배경색 설정
-                  padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 설정
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(11.0), // 버튼 모서리 둥글게 설정
+      body: SafeArea(
+          child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 100),
+              TextField(
+                controller: _receiverController,
+                decoration: InputDecoration(labelText: '받는 사람'),
+              ),
+              SizedBox(height: 50),
+              TextField(
+                controller: _amountController,
+                decoration: InputDecoration(labelText: '금액'),
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                  NoNegativeNumberFormatter(),
+                ],
+              ),
+              SizedBox(height: 150),
+              SizedBox(
+                width: double.infinity, // 버튼 너비를 화면 전체로 설정
+                child: TextButton(
+                  onPressed: _sendMoney,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color(0xFFB8EA92), // 버튼 배경색 설정
+                    padding: EdgeInsets.symmetric(vertical: 16.0), // 버튼 높이 설정
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(11.0), // 버튼 모서리 둥글게 설정
+                    ),
                   ),
-                ),
-                child: Text(
-                  '송금하기',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    color: Colors.black, // 텍스트 색상 설정
+                  child: Text(
+                    '송금하기',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.black, // 텍스트 색상 설정
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }

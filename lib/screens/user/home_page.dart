@@ -159,75 +159,74 @@ class HomePageState extends State<HomePage> {
     final formattedMoney = "${formatCurrency.format(money)}P";
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('결제하기'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            flex: 3,
-            child: Center(
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              flex: 3,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    QrImageView(
+                      data: qrData,
+                      version: QrVersions.auto,
+                      size: 200.0,
+                      backgroundColor: Colors.white,
+                      padding: EdgeInsets.all(10),
+                    ),
+                    SizedBox(height: 10),
+                    Text('$remainingTime초 뒤 재생성'),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFB8EA92),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              margin: EdgeInsets.only(bottom: 8),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  QrImageView(
-                    data: qrData,
-                    version: QrVersions.auto,
-                    size: 200.0,
-                    backgroundColor: Colors.white,
-                    padding: EdgeInsets.all(10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '내 계좌',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.refresh, color: Colors.black),
+                            onPressed: refreshData,
+                            tooltip: 'Refresh Account Info',
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '$username님',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
-                  Text('$remainingTime초 뒤 재생성'),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      formattedMoney,
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFB8EA92),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: EdgeInsets.only(bottom: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          '내 계좌',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.refresh, color: Colors.black),
-                          onPressed: refreshData,
-                          tooltip: 'Refresh Account Info',
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '$username님',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    formattedMoney,
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      )
     );
   }
 }

@@ -324,77 +324,76 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              '$username님',
-              style: TextStyle(
-                fontFamily: 'SUIT',
-                fontWeight: FontWeight.w800,
-                fontSize: 35,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                '$username님',
+                style: TextStyle(
+                  fontFamily: 'SUIT',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 35,
+                ),
               ),
-            ),
-            SizedBox(height: 15.0,),
-            Divider(thickness: 1, color: Colors.grey),
-            TextButton(
-              onPressed: isSuspended
-                  ? _showSuspendedMessage
-                  : () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => nfcCardId.isEmpty
-                        ? NfcRegisterPage()
-                        : NfcUnregisterPage(),
-                  ),
-                ).then((value) {
-                  _fetchUserData();
-                });
-              },
-              style: commonButtonStyle,
-              child: Text(nfcCardId.isEmpty ? '카드 연동' : '카드 연동 해지'),
-            ),
-            Divider(thickness: 1, color: Colors.grey),
-            TextButton(
-              onPressed: isSuspended ? _showSuspendedMessage : _showUpdateUsernameDialog,
-              style: commonButtonStyle,
-              child: Text('아이디 변경'),
-            ),
-            TextButton(
-              onPressed: isSuspended ? _showSuspendedMessage : _showUpdatePasswordDialog,
-              style: commonButtonStyle,
-              child: Text('비밀번호 변경'),
-            ),
-            Divider(thickness: 1, color: Colors.grey),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TermsPage()),
-                );
-              },
-              style: commonButtonStyle,
-              child: Text('이용약관'),
-            ),
-            TextButton(
-              onPressed: _showLogoutConfirmationDialog,
-              style: commonButtonStyle,
-              child: Text('로그아웃'),
-            ),
-            TextButton(
-              onPressed: isSuspended ? _showSuspendedMessage : _showDeleteAccountConfirmationDialog,
-              style: commonButtonStyle,
-              child: Text('탈퇴하기'),
-            ),
-          ],
+              SizedBox(height: 15.0,),
+              Divider(thickness: 1, color: Colors.grey),
+              TextButton(
+                onPressed: isSuspended
+                    ? _showSuspendedMessage
+                    : () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => nfcCardId.isEmpty
+                          ? NfcRegisterPage()
+                          : NfcUnregisterPage(),
+                    ),
+                  ).then((value) {
+                    _fetchUserData();
+                  });
+                },
+                style: commonButtonStyle,
+                child: Text(nfcCardId.isEmpty ? '카드 연동' : '카드 연동 해지'),
+              ),
+              Divider(thickness: 1, color: Colors.grey),
+              TextButton(
+                onPressed: isSuspended ? _showSuspendedMessage : _showUpdateUsernameDialog,
+                style: commonButtonStyle,
+                child: Text('아이디 변경'),
+              ),
+              TextButton(
+                onPressed: isSuspended ? _showSuspendedMessage : _showUpdatePasswordDialog,
+                style: commonButtonStyle,
+                child: Text('비밀번호 변경'),
+              ),
+              Divider(thickness: 1, color: Colors.grey),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TermsPage()),
+                  );
+                },
+                style: commonButtonStyle,
+                child: Text('이용약관'),
+              ),
+              TextButton(
+                onPressed: _showLogoutConfirmationDialog,
+                style: commonButtonStyle,
+                child: Text('로그아웃'),
+              ),
+              TextButton(
+                onPressed: isSuspended ? _showSuspendedMessage : _showDeleteAccountConfirmationDialog,
+                style: commonButtonStyle,
+                child: Text('탈퇴하기'),
+              ),
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }

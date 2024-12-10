@@ -81,78 +81,77 @@ class TransactionPageState extends State<TransactionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('거래 내역'),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _fetchTransactions,
-                child: transactions.isEmpty
-                    ? Center(child: Text('거래 내역이 없습니다.'))
-                    : ListView.builder(
-                  itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
-                  itemBuilder: (context, index) {
-                    final transaction = transactions[index];
-                    final String sender = transaction['sender'] ?? '알 수 없음';
-                    final String receiver = transaction['receiver'] ?? '알 수 없음';
-                    final String date = _formatDate(transaction['date']);
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _fetchTransactions,
+                  child: transactions.isEmpty
+                      ? Center(child: Text('거래 내역이 없습니다.'))
+                      : ListView.builder(
+                    itemCount: itemsToShow < transactions.length ? itemsToShow : transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      final String sender = transaction['sender'] ?? '알 수 없음';
+                      final String receiver = transaction['receiver'] ?? '알 수 없음';
+                      final String date = _formatDate(transaction['date']);
 
-                    // amount 변환
-                    double amount;
-                    try {
-                      amount = double.parse(transaction['amount'].toString());
-                    } catch (e) {
-                      amount = 0.0;
-                    }
+                      // amount 변환
+                      double amount;
+                      try {
+                        amount = double.parse(transaction['amount'].toString());
+                      } catch (e) {
+                        amount = 0.0;
+                      }
 
-                    // transaction에서 type 가져오기
-                    String type = transaction['type'] ?? 'N/A';
-                    bool isSender = transaction['senderId'] == userId;
-                    bool isReceiver = transaction['receiverId'] == userId;
+                      // transaction에서 type 가져오기
+                      String type = transaction['type'] ?? 'N/A';
+                      bool isSender = transaction['senderId'] == userId;
+                      bool isReceiver = transaction['receiverId'] == userId;
 
-                    // 표시할 금액 설정
-                    String amountDisplay = _getAmountDisplay(amount, type, isSender, isReceiver);
+                      // 표시할 금액 설정
+                      String amountDisplay = _getAmountDisplay(amount, type, isSender, isReceiver);
 
-                    // 색상 설정
-                    Color amountColor;
-                    if (type == 'transfer' && isSender) {
-                      amountColor = Colors.red;
-                    } else if (type == 'transfer' && isReceiver) {
-                      amountColor = Colors.green;
-                    } else if (type == 'festival-activity') {
-                      amountColor = Colors.green;
-                    } else if (type == 'festival-purchase' || type == 'purchase') {
-                      amountColor = Colors.red;
-                    } else {
-                      amountColor = amountDisplay.contains('-') ? Colors.red : Colors.green;
-                    }
+                      // 색상 설정
+                      Color amountColor;
+                      if (type == 'transfer' && isSender) {
+                        amountColor = Colors.red;
+                      } else if (type == 'transfer' && isReceiver) {
+                        amountColor = Colors.green;
+                      } else if (type == 'festival-activity') {
+                        amountColor = Colors.green;
+                      } else if (type == 'festival-purchase' || type == 'purchase') {
+                        amountColor = Colors.red;
+                      } else {
+                        amountColor = amountDisplay.contains('-') ? Colors.red : Colors.green;
+                      }
 
-                    return ListTile(
-                      title: Text('$sender → $receiver'),
-                      subtitle: Text(date),
-                      trailing: Text(
-                        amountDisplay,
-                        style: TextStyle(
-                          color: amountColor,
+                      return ListTile(
+                        title: Text('$sender → $receiver'),
+                        subtitle: Text(date),
+                        trailing: Text(
+                          amountDisplay,
+                          style: TextStyle(
+                            color: amountColor,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-            if (itemsToShow < transactions.length)
-              ElevatedButton(
-                onPressed: _loadMore,
-                child: Text('더 보기'),
-              ),
-          ],
+              if (itemsToShow < transactions.length)
+                ElevatedButton(
+                  onPressed: _loadMore,
+                  child: Text('더 보기'),
+                ),
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 }
