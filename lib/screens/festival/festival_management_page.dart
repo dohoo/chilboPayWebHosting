@@ -31,7 +31,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
         activityCount = user['activityCount'];
       });
     } catch (e) {
-      print('Failed to fetch activity count: $e');
+      print('남은 활동 횟수를 불러오는 데 실패하였습니다.');
     }
   }
 
@@ -42,7 +42,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
         products = List<Map<String, dynamic>>.from(fetchedProducts);
       });
     } catch (e) {
-      print('Failed to fetch products: $e');
+      print('상품을 불러오는 데 실패하였습니다.');
     }
   }
 
@@ -59,7 +59,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
         activities = List<Map<String, dynamic>>.from(data['activities']);
       });
     } catch (e) {
-      print('Failed to fetch activities: $e');
+      print('활동을 불러오는 데 실패하였습니다.');
     }
   }
 
@@ -67,7 +67,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Festival Management'),
+        title: Text('관리'),
       ),
       body: Column(
         children: [
@@ -76,7 +76,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               activityCount == null
-                  ? 'Loading activity count...'
+                  ? '남은 활동 횟수 불러오는 중...'
                   : '남은 활동 횟수: $activityCount 회',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
@@ -86,11 +86,11 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
             children: [
               TextButton(
                 onPressed: () => setState(() => showProducts = true),
-                child: Text('Products'),
+                child: Text('상품'),
               ),
               TextButton(
                 onPressed: () => setState(() => showProducts = false),
-                child: Text('Activities'),
+                child: Text('활동'),
               ),
             ],
           ),
@@ -104,7 +104,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
 
   Widget _buildProductList() {
     return products.isEmpty
-        ? Center(child: Text('No products available.'))
+        ? Center(child: Text('이용 가능한 상품이 없습니다.'))
         : ListView.builder(
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -118,7 +118,7 @@ class _FestivalManagementPageState extends State<FestivalManagementPage> {
 
   Widget _buildActivityList() {
     return activities.isEmpty
-        ? Center(child: Text('No activities available.'))
+        ? Center(child: Text('이용가능한 활동이 없습니다.'))
         : ListView.builder(
       itemCount: activities.length,
       itemBuilder: (context, index) {

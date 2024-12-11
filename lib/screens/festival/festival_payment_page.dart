@@ -43,7 +43,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
         isSuspended = user['status'] == 'suspended';
       });
     } catch (e) {
-      print('Failed to fetch user data: $e');
+      print('유저 정보를 불러오는 데 실패하였습니다.');
     }
   }
 
@@ -55,7 +55,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
         isSuspended = user['status'] == 'suspended';
       });
     } catch (e) {
-      print('Failed to fetch activity count: $e');
+      print('남은 활동 횟수를 불러오는 데 실패하였습니다.');
     }
   }
 
@@ -66,7 +66,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
         products = List<Map<String, dynamic>>.from(fetchedProducts);
       });
     } catch (e) {
-      print('Error fetching products: $e');
+      print('상품을 가져오는 데 실패하였습니다.');
     }
   }
 
@@ -80,7 +80,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
         activities = List<Map<String, dynamic>>.from(data['activities']);
       });
     } catch (e) {
-      print('Error fetching activities: $e');
+      print('활동을 불러오는 데 실패하였습니다.');
     }
   }
 
@@ -168,7 +168,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   activityCount == null
-                      ? 'Loading activity count...'
+                      ? '남은 활동 횟수 불러오는 중...'
                       : '남은 활동 횟수: $activityCount 회',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -176,8 +176,8 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
               TabBar(
                 controller: _tabController,
                 tabs: [
-                  Tab(text: 'Products'),
-                  Tab(text: 'Activities'),
+                  Tab(text: '상품'),
+                  Tab(text: '활동'),
                 ],
               ),
             ],

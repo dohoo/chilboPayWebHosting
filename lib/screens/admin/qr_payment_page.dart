@@ -15,7 +15,7 @@ class QrPaymentPage extends StatefulWidget {
 
 class _QrPaymentPageState extends State<QrPaymentPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  String message = 'Please scan your QR code';
+  String message = 'QR코드를 카메라에 대주세요.';
   QRViewController? controller;
   bool isProcessing = false;
 
@@ -33,7 +33,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
       final token = scanData.code;
       if (token == null) {
         setState(() {
-          message = 'Invalid QR code.';
+          message = 'QR코드가 유효하지 않습니다.';
         });
         controller.resumeCamera();
         return;
@@ -41,7 +41,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
 
       setState(() {
         isProcessing = true;
-        message = 'Processing payment...';
+        message = '결제 진행 중...';
       });
 
       try {
@@ -61,7 +61,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => PaymentFailedPage(
-                    errorMessage: result['message'] ?? 'Unknown error occurred',
+                    errorMessage: result['message'] ?? '결제에 실패하였습니다.',
                   ),
                 ),
               );
@@ -73,7 +73,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
 
         // Payment completed successfully
         setState(() {
-          message = 'Payment completed successfully!';
+          message = '결제 완료!';
         });
 
         // Navigate to PaymentCompletePage on success
@@ -108,7 +108,7 @@ class _QrPaymentPageState extends State<QrPaymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('QR Code Payment')),
+      appBar: AppBar(title: Text('QR코드 결제')),
       body: Column(
         children: <Widget>[
           Expanded(

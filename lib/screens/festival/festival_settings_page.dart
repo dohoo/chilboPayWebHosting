@@ -15,21 +15,21 @@ class FestivalSettingsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Logout'),
-          content: Text('Are you sure you want to logout?'),
+          title: Text('로그아웃'),
+          content: Text('로그아웃 하시겠습니까?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 _logout(context); // context 전달
                 Navigator.of(context).pop();
               },
-              child: Text('Logout'),
+              child: Text('확인'),
             ),
           ],
         );
@@ -41,7 +41,7 @@ class FestivalSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton(
-        child: Text('Logout'),
+        child: Text('로그아웃'),
         onPressed: () => _showLogoutConfirmationDialog(context), // context 전달
       ),
     );

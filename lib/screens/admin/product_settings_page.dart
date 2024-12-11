@@ -25,7 +25,7 @@ class _ProductSettingsPageState extends State<ProductSettingsPage> {
     } catch (e) {
       print('Error fetching products: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load products')),
+        SnackBar(content: Text('상품을 불러오는 데 실패하였습니다.')),
       );
     }
   }
@@ -38,13 +38,13 @@ class _ProductSettingsPageState extends State<ProductSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(product == null ? 'Add Product' : 'Edit Product'),
+          title: Text(product == null ? '상품 추가' : '상품 편집'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Product Name'),
+                decoration: InputDecoration(labelText: '상품명'),
               ),
               TextField(
                 controller: _priceController,
@@ -59,7 +59,7 @@ class _ProductSettingsPageState extends State<ProductSettingsPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () async {
@@ -75,11 +75,11 @@ class _ProductSettingsPageState extends State<ProductSettingsPage> {
                 } catch (e) {
                   print('Error updating or adding product: $e');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update or add product')),
+                    SnackBar(content: Text('상품 추가 및 수정에 실패하였습니다.')),
                   );
                 }
               },
-              child: Text(product == null ? 'Add' : 'Update'),
+              child: Text(product == null ? '추가' : '수정'),
             ),
             if (product != null)
               TextButton(
@@ -100,7 +100,7 @@ class _ProductSettingsPageState extends State<ProductSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product Settings'),
+        title: Text('상품 설정'),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -114,7 +114,7 @@ class _ProductSettingsPageState extends State<ProductSettingsPage> {
           final product = products[index];
           return ListTile(
             title: Text(product['name']),
-            subtitle: Text('Price: ${product['price']}'),
+            subtitle: Text('가격: ${product['price']}'),
             trailing: IconButton(
               icon: Icon(Icons.settings),
               onPressed: () => _showProductDialog(product: product),

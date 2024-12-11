@@ -37,7 +37,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Statistics'),
+        title: Text('통계'),
       ),
       body: RefreshIndicator(
         onRefresh: fetchTotalMoney, // Trigger data refresh on pull
@@ -48,9 +48,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
               _errorMessage.isEmpty
                   ? Column(
                 children: [
-                  Text('Total money of users: $_totalUserMoney'),
+                  Text('유저 총 포인트 합계: $_totalUserMoney'),
                   SizedBox(height: 10),
-                  Text('Total money of festivals: $_totalFestivalMoney'),
+                  Text('동아리 총 포인트 합계: $_totalFestivalMoney'),
                 ],
               )
                   : Center(
@@ -67,7 +67,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     MaterialPageRoute(builder: (context) => TransactionsPage()),
                   );
                 },
-                child: Text('View Transactions'),
+                child: Text('전체 거래 내역 보기'),
               ),
             ],
           ),

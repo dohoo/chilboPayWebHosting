@@ -12,19 +12,27 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   bool _termsAccepted = false;
+  String? _message;
+  Color _messageColor = Colors.red;
 
   Future<void> _signUp() async {
+    setState(() {
+      _message = null; // Reset the message on each attempt
+    });
+
     if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Passwords do not match')),
-      );
+      setState(() {
+        _message = '비밀번호가 일치하지 않습니다.';
+        _messageColor = Colors.red;
+      });
       return;
     }
 
     if (!_termsAccepted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You must accept the terms and conditions')),
-      );
+      setState(() {
+        _message = '이용약관을 읽고 체크표시를 해주세요.';
+        _messageColor = Colors.red;
+      });
       return;
     }
 
@@ -35,24 +43,64 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign up successful')),
-        );
+        _showFadingMessage('회원가입 완료!');
         Navigator.pop(context);
       } else if (response.statusCode == 409) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Username already exists')),
-        );
+        setState(() {
+          _message = 'ID가 이미 존재합니다.';
+          _messageColor = Colors.red;
+        });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign up failed')),
-        );
+        setState(() {
+          _message = '회원가입에 실패하였습니다.';
+          _messageColor = Colors.red;
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred: $e')),
-      );
+      setState(() {
+        _message = '예기치 못한 문제가 발생하였습니다. 다시 시도해주세요: $e';
+        _messageColor = Colors.red;
+      });
     }
+  }
+
+  void _showFadingMessage(String message) {
+    final overlay = Overlay.of(context);
+    final overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 50.0,
+        left: MediaQuery.of(context).size.width * 0.1,
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Material(
+          color: Colors.transparent,
+          child: AnimatedOpacity(
+            opacity: 1.0,
+            duration: Duration(milliseconds: 500),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              alignment: Alignment.center,
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 1), () {
+      overlayEntry.markNeedsBuild();
+      Future.delayed(Duration(milliseconds: 500), () {
+        overlayEntry.remove();
+      });
+    });
   }
 
   void _navigateToTermsPage() {
@@ -76,7 +124,7 @@ class _SignUpPageState extends State<SignUpPage> {
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(
-                labelText: 'Username',
+                labelText: 'ID',
                 labelStyle: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -110,7 +158,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 GestureDetector(
                   onTap: _navigateToTermsPage,
                   child: Text(
-                    '이용약관 및 개인정보 처리 방침에 동의합니다(필수)',
+                    '이용약관에 동의합니다.(필수)',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
                       fontSize: 11.0,
@@ -124,8 +172,15 @@ class _SignUpPageState extends State<SignUpPage> {
             ElevatedButton(
               onPressed: _signUp,
               style: Theme.of(context).elevatedButtonTheme.style,
-              child: Text('Sign Up'),
+              child: Text('가입하기'),
             ),
+            if (_message != null) ...[
+              SizedBox(height: 10),
+              Text(
+                _message!,
+                style: TextStyle(color: _messageColor),
+              ),
+            ],
           ],
         ),
       ),

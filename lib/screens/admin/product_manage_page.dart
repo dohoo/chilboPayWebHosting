@@ -84,7 +84,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Products and Activities'),
+        title: Text('상품/활동 관리'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -103,7 +103,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
                     });
                   },
                   child: Text(
-                    'Add Product',
+                    '상품 추가',
                     style: TextStyle(
                       color: isEditingProduct ? Colors.blue : Colors.grey,
                     ),
@@ -119,7 +119,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
                     });
                   },
                   child: Text(
-                    'Add Activity',
+                    '활동 추가',
                     style: TextStyle(
                       color: !isEditingProduct ? Colors.blue : Colors.grey,
                     ),
@@ -129,7 +129,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
             ),
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: isEditingProduct ? 'Product Name' : 'Activity Name'),
+              decoration: InputDecoration(labelText: isEditingProduct ? '상품명' : '활동명'),
             ),
             TextField(
               controller: priceController,
@@ -139,7 +139,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
             ),
             ElevatedButton(
               onPressed: _addOrUpdateItem,
-              child: Text(editingIndex == null ? 'Add' : 'Update'),
+              child: Text(editingIndex == null ? '추가' : '수정'),
             ),
             Expanded(
               child: ListView(
@@ -147,7 +147,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
                   if (products.isNotEmpty) ...[
                     ListTile(
                       title: Text(
-                        'Products',
+                        '상품',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -156,7 +156,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
                       final product = entry.value;
                       return ListTile(
                         title: Text(product['name']),
-                        subtitle: Text('Price: ${product['price']}'),
+                        subtitle: Text('가격: ${product['price']}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -176,7 +176,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
                   if (activities.isNotEmpty) ...[
                     ListTile(
                       title: Text(
-                        'Activities',
+                        '활동',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -185,7 +185,7 @@ class _ProductManagePageState extends State<ProductManagePage> {
                       final activity = entry.value;
                       return ListTile(
                         title: Text(activity['name']),
-                        subtitle: Text('Reward: ${activity['price']}'),
+                        subtitle: Text('가격: ${activity['price']}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -210,10 +210,10 @@ class _ProductManagePageState extends State<ProductManagePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pop(context, {'products': products, 'activities': activities});
+          Navigator.pop(context, {'상품': products, '활동': activities});
         },
         child: Icon(Icons.check),
-        tooltip: 'Save and Return',
+        tooltip: '저장',
       ),
     );
   }

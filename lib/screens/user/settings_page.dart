@@ -44,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load user data: $e')),
+        SnackBar(content: Text('유저 정보를 불러오는 데 실패하였습니다.')),
       );
       _logout();
     }
@@ -67,7 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
         currentPassword: currentPassword,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User updated successfully')),
+        SnackBar(content: Text('완료되었습니다.')),
       );
       _fetchUserData();
       _usernameController.clear();
@@ -81,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update user: $e')),
+          SnackBar(content: Text('문제가 발생하였습니다.')),
         );
       }
     }
@@ -100,7 +100,7 @@ class _SettingsPageState extends State<SettingsPage> {
       final success = await UserApi.deleteUser(userId!, password); // 비밀번호 전달
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account deleted successfully')),
+          SnackBar(content: Text('계정이 삭제되었습니다.')),
         );
         await prefs.clear();
         Navigator.pushReplacement(
@@ -114,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete account: $e')),
+        SnackBar(content: Text('계정 삭제에 실패하였습니다.')),
       );
     }
   }
@@ -324,9 +324,6 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings'),
-      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -380,7 +377,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               },
               style: commonButtonStyle,
-              child: Text('이용약관 및 개인정보 처리 방침'),
+              child: Text('이용약관'),
             ),
             TextButton(
               onPressed: _showLogoutConfirmationDialog,

@@ -13,7 +13,7 @@ class PaymentFailedPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment Failed'),
+        title: Text('결제 실패'),
       ),
       body: Center(
         child: Column(
@@ -26,7 +26,7 @@ class PaymentFailedPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Payment Failed',
+              '결제에 실패하였습니다.',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

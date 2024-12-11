@@ -61,14 +61,6 @@ class TermsPage extends StatelessWidget {
                   '포인트는 수원칠보고등학교에서 승인한 행사 참여를 통해 적립됩니다. 적립된 포인트는 지정된 상품으로만 교환 가능하며, 환불 또는 현금화는 불가능합니다. 부정한 방법으로 포인트를 적립하거나 사용하는 경우 해당 포인트는 몰수될 수 있습니다.\n\n',
                 ),
                 TextSpan(
-                  text: '5. 개인정보 보호\n',
-                  style: defaultTextStyle?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                TextSpan(
-                  text:
-                  '본 앱은 사용자의 개인정보를 안전하게 보호하며, 수집된 개인정보는 다음 목적을 위해 사용됩니다:\n\n- 포인트 적립 및 사용 관리\n- 학교 행사 참여 데이터 분석\n\n개인정보는 관련 법률(예: 개인정보 보호법)에 따라 보호되며, 사용자는 자신의 개인정보를 열람, 수정, 삭제 요청할 수 있습니다.\n\n',
-                ),
-                TextSpan(
                   text: '6. 책임의 제한\n',
                   style: defaultTextStyle?.copyWith(fontWeight: FontWeight.bold),
                 ),

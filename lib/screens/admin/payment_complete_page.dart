@@ -18,7 +18,7 @@ class _PaymentCompletePageState extends State<PaymentCompletePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Payment Complete')),
+      appBar: AppBar(title: Text('결제 완료')),
       body: Center(
         child: Text(
           '결제가 완료되었습니다.',

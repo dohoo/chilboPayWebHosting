@@ -18,7 +18,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin Settings'),
+        title: Text('설정'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -26,19 +26,19 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
           children: [
             ElevatedButton(
               onPressed: () => _showCreateAccountDialog(context, 'user'),
-              child: Text('Create Student Account'),
+              child: Text('학생 계정 만들기'),
             ),
             ElevatedButton(
               onPressed: () => _showCreateAccountDialog(context, 'festival'),
-              child: Text('Create Club Account'),
+              child: Text('동아리 계정 만들기'),
             ),
             ElevatedButton(
               onPressed: () => _showChangePasswordDialog(context),
-              child: Text('Change Password'),
+              child: Text('비밀번호 변경'),
             ),
             ElevatedButton(
               onPressed: () => _showLogoutConfirmationDialog(context),
-              child: Text('Logout'),
+              child: Text('로그아웃'),
             ),
           ],
         ),
@@ -51,19 +51,19 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Logout'),
-          content: Text('Are you sure you want to logout?'),
+          title: Text('로그아웃'),
+          content: Text('로그아웃 하시겠습니까?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 _logout(context);
                 Navigator.of(context).pop();
               },
-              child: Text('Logout'),
+              child: Text('로그아웃'),
             ),
           ],
         );
@@ -80,9 +80,8 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
     } catch (e) {
-      print('Error logging out: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to logout')),
+        SnackBar(content: Text('로그아웃에 실패하였습니다.')),
       );
     }
   }
@@ -97,14 +96,14 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Create ${accountType == 'user' ? 'Student' : 'Club'} Account'),
+          title: Text('${accountType == 'user' ? '학생' : '동아리'} 계정 만들기'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
+                  decoration: InputDecoration(labelText: 'ID'),
                 ),
                 TextField(
                   controller: passwordController,
@@ -118,7 +117,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                 ),
                 TextField(
                   controller: moneyController,
-                  decoration: InputDecoration(labelText: 'Money'),
+                  decoration: InputDecoration(labelText: '포인트'),
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
@@ -141,7 +140,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                         });
                       }
                     },
-                    child: Text('Add Club Product/Activity'),
+                    child: Text('상품/활동 추가하기'),
                   ),
                 ],
               ],
@@ -149,11 +148,11 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              child: Text('Create'),
+              child: Text('만들기'),
               onPressed: () {
                 if (passwordController.text == confirmPasswordController.text) {
                   _createAccount(
@@ -167,7 +166,7 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Passwords do not match')),
+                    SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
                   );
                 }
               },
@@ -189,11 +188,11 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
     try {
       await AdminApi.createAccount(accountType, username, password, money, products, activities);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Account created successfully')),
+        SnackBar(content: Text('계정이 생성되었습니다.')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating account: $e')),
+        SnackBar(content: Text('계정을 만드는 데 실패하였습니다.: $e')),
       );
     }
   }
@@ -207,41 +206,41 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Change Password'),
+          title: Text('비밀번호 변경'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: oldPasswordController,
-                decoration: InputDecoration(labelText: 'Old Password'),
+                decoration: InputDecoration(labelText: '기존 비밀번호'),
                 obscureText: true,
               ),
               TextField(
                 controller: newPasswordController,
-                decoration: InputDecoration(labelText: 'New Password'),
+                decoration: InputDecoration(labelText: '새로운 비밀번호'),
                 obscureText: true,
               ),
               TextField(
                 controller: confirmNewPasswordController,
-                decoration: InputDecoration(labelText: 'Confirm New Password'),
+                decoration: InputDecoration(labelText: '비밀번호 확인'),
                 obscureText: true,
               ),
             ],
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              child: Text('Change'),
+              child: Text('변경'),
               onPressed: () {
                 if (newPasswordController.text == confirmNewPasswordController.text) {
                   _changePassword(oldPasswordController.text, newPasswordController.text);
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('New passwords do not match')),
+                    SnackBar(content: Text('비밃번호가 일치하지 않습니다.')),
                   );
                 }
               },
@@ -258,16 +257,16 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
       final userId = prefs.getInt('userId'); // userId 가져오기
 
       if (userId == null) {
-        throw Exception('User ID not found');
+        throw Exception('ID를 찾을 수 없습니다.');
       }
 
       await AdminApi.changePassword(userId, oldPassword, newPassword); // userId 전달
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password changed successfully')),
+        SnackBar(content: Text('비밀번호 변경 완료')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error changing password: ${e.toString()}')),
+        SnackBar(content: Text('비밀번호 변경 실패: ${e.toString()}')),
       );
     }
   }

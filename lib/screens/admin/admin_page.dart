@@ -30,18 +30,18 @@ class _AdminPageState extends State<AdminPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter Admin Password'),
+          title: Text('관리자 비밀번호를 입력하세요.'),
           content: TextField(
             controller: passwordController,
             obscureText: true,
-            decoration: InputDecoration(hintText: 'Password'),
+            decoration: InputDecoration(hintText: '비밀번호'),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('취소'),
             ),
             TextButton(
               onPressed: () async {
@@ -50,7 +50,7 @@ class _AdminPageState extends State<AdminPage> {
                   isPasswordCorrect = await AdminApi.verifyAdminPassword(passwordController.text);
                   if (!isPasswordCorrect) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Incorrect password')),
+                      SnackBar(content: Text('비밀번호가 일치하지 않습니다.')),
                     );
                   }
                 } catch (e) {
@@ -101,19 +101,19 @@ class _AdminPageState extends State<AdminPage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.supervised_user_circle, size: 24),
-            label: 'User Management',
+            label: '사용자 관리',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.payment, size: 24),
-            label: 'Card Payment',
+            label: '결제 관리',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart, size: 24),
-            label: 'Statistics',
+            label: '통계',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings, size: 24),
-            label: 'Settings',
+            label: '설정',
           ),
         ],
         currentIndex: _selectedIndex,

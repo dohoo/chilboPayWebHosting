@@ -50,7 +50,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Products and Activities'),
+        title: Text('상품/활동 추가'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -66,7 +66,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
                     });
                   },
                   child: Text(
-                    'Add Product',
+                    '상품 추가',
                     style: TextStyle(color: isProduct ? Colors.blue : Colors.grey),
                   ),
                 ),
@@ -77,7 +77,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
                     });
                   },
                   child: Text(
-                    'Add Activity',
+                    '활동 추가',
                     style: TextStyle(color: !isProduct ? Colors.blue : Colors.grey),
                   ),
                 ),
@@ -85,7 +85,7 @@ class _ProductAddPageState extends State<ProductAddPage> {
             ),
             TextField(
               controller: nameController,
-              decoration: InputDecoration(labelText: isProduct ? 'Product Name' : 'Activity Name'),
+              decoration: InputDecoration(labelText: isProduct ? '상품명' : '활동명'),
             ),
             TextField(
               controller: priceController,
@@ -95,16 +95,16 @@ class _ProductAddPageState extends State<ProductAddPage> {
             ),
             ElevatedButton(
               onPressed: _addItem,
-              child: Text(isProduct ? 'Add Product' : 'Add Activity'),
+              child: Text(isProduct ? '상품 추가' : '활동 추가'),
             ),
             Expanded(
               child: ListView(
                 children: [
                   if (products.isNotEmpty) ...[
-                    ListTile(title: Text('Products', style: TextStyle(fontWeight: FontWeight.bold))),
+                    ListTile(title: Text('상품', style: TextStyle(fontWeight: FontWeight.bold))),
                     ...products.map((product) => ListTile(
                       title: Text(product['name']),
-                      subtitle: Text('Price: ${product['price']}'),
+                      subtitle: Text('가격: ${product['price']}'),
                       trailing: IconButton(
                         icon: Icon(Icons.delete),
                         onPressed: () {
@@ -116,10 +116,10 @@ class _ProductAddPageState extends State<ProductAddPage> {
                     )),
                   ],
                   if (activities.isNotEmpty) ...[
-                    ListTile(title: Text('Activities', style: TextStyle(fontWeight: FontWeight.bold))),
+                    ListTile(title: Text('활동', style: TextStyle(fontWeight: FontWeight.bold))),
                     ...activities.map((activity) => ListTile(
                       title: Text(activity['name']),
-                      subtitle: Text('Reward: ${activity['price']}'),
+                      subtitle: Text('가격: ${activity['price']}'),
                       trailing: IconButton(
                         icon: Icon(Icons.delete),
                         onPressed: () {
@@ -138,10 +138,10 @@ class _ProductAddPageState extends State<ProductAddPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pop(context, {'products': products, 'activities': activities});
+          Navigator.pop(context, {'상품': products, '활동': activities});
         },
         child: Icon(Icons.check),
-        tooltip: 'Save and Return',
+        tooltip: '저장',
       ),
     );
   }

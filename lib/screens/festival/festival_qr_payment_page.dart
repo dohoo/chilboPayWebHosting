@@ -21,7 +21,7 @@ class FestivalQrPaymentPage extends StatefulWidget {
 
 class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  String message = 'Please scan your QR code';
+  String message = 'QR코드를 카메라에 대주세요.';
   QRViewController? controller;
   bool isProcessing = false;
 
@@ -39,7 +39,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
       final token = scanData.code;
       if (token == null || token.isEmpty) {
         setState(() {
-          message = 'Invalid QR code';
+          message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.';
         });
         controller.resumeCamera();
         return;
@@ -47,7 +47,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
 
       setState(() {
         isProcessing = true;
-        message = 'Processing payment...';
+        message = '결제 진행중...';
       });
 
       try {
@@ -68,7 +68,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
             context,
             MaterialPageRoute(
               builder: (context) => PaymentFailedPage(
-                errorMessage: result['message'] ?? 'Payment failed for unknown reasons',
+                errorMessage: result['message'] ?? '결제에 실패하였습니다.',
               ),
             ),
           );
@@ -79,7 +79,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
           context,
           MaterialPageRoute(
             builder: (context) => PaymentFailedPage(
-              errorMessage: 'Failed to pay with QR code: $e',
+              errorMessage: '결제에 실패하였습니다.',
             ),
           ),
         );

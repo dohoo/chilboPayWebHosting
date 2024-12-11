@@ -78,7 +78,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Festival Account'),
+          title: Text('동아리 계정 관리'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -95,7 +95,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -121,13 +121,13 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Festival Account'),
+          title: Text('동아리 계정 추가'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration: InputDecoration(labelText: 'ID'),
               ),
               TextField(
                 controller: passwordController,
@@ -138,13 +138,13 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Add'),
+              child: Text('추가'),
               onPressed: () {
                 createFestivalAccount(usernameController.text, passwordController.text);
                 Navigator.of(context).pop();
@@ -164,7 +164,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Festival Products'),
+            title: Text('동아리 상품'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -193,13 +193,13 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
             ),
             actions: <Widget>[
               TextButton(
-                child: Text('Close'),
+                child: Text('닫기'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               ElevatedButton(
-                child: Text('Add Product'),
+                child: Text('상품 추가'),
                 onPressed: () {
                   _showAddProductDialog(festivalId);
                 },
@@ -221,30 +221,30 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Product'),
+          title: Text('상품 추가하기'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: productNameController,
-                decoration: InputDecoration(labelText: 'Product Name'),
+                decoration: InputDecoration(labelText: '상품명'),
               ),
               TextField(
                 controller: productPriceController,
-                decoration: InputDecoration(labelText: 'Product Price'),
+                decoration: InputDecoration(labelText: '상품 가격'),
                 keyboardType: TextInputType.number,
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Add'),
+              child: Text('추가'),
               onPressed: () {
                 addFestivalProduct(
                   festivalId,
@@ -268,24 +268,24 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Product'),
+          title: Text('상품 편집'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: productNameController,
-                decoration: InputDecoration(labelText: 'Product Name'),
+                decoration: InputDecoration(labelText: '상품명'),
               ),
               TextField(
                 controller: productPriceController,
-                decoration: InputDecoration(labelText: 'Product Price'),
+                decoration: InputDecoration(labelText: '상품 가격'),
                 keyboardType: TextInputType.number,
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('취소'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -311,7 +311,7 @@ class _FestivalAccountManagementPageState extends State<FestivalAccountManagemen
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Festival Accounts'),
+        title: Text('동아리 계정'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add),

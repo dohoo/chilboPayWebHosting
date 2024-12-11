@@ -9,7 +9,7 @@ class PaymentSuccessPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment Success'),
+        title: Text('결제'),
       ),
       body: Center(
         child: Column(
@@ -22,7 +22,7 @@ class PaymentSuccessPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Payment Completed Successfully!',
+              '결제가 완료되었습니다!',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

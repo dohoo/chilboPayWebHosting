@@ -20,13 +20,13 @@ class FestivalNfcPaymentPage extends StatefulWidget {
 }
 
 class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
-  String message = 'Tap NFC Card';
+  String message = '카드를 핸드폰 뒷면에 대주세요.';
   bool isLoading = false;
 
   Future<void> _startNfcPayment() async {
     setState(() {
       isLoading = true;
-      message = 'Processing payment...';
+      message = '결제 진행 중...';
     });
 
     try {
@@ -52,7 +52,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
           context,
           MaterialPageRoute(
             builder: (context) => PaymentFailedPage(
-              errorMessage: result['message'] ?? 'Payment failed for unknown reasons',
+              errorMessage: result['message'] ?? '결제에 실패하였습니다.',
             ),
           ),
         );
@@ -62,7 +62,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
         context,
         MaterialPageRoute(
           builder: (context) => PaymentFailedPage(
-            errorMessage: 'Payment failed: $e',
+            errorMessage: '결제에 실패하였습니다.',
           ),
         ),
       );
@@ -83,7 +83,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('NFC Payment')),
+      appBar: AppBar(title: Text('카드 결제')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -93,7 +93,7 @@ class _FestivalNfcPaymentPageState extends State<FestivalNfcPaymentPage> {
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
-              Text('Processing payment...'),
+              Text('결제 진행중...'),
             ],
           )
               : Text(message),

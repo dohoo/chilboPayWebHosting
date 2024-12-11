@@ -22,7 +22,7 @@ class _PaymentFailedPageState extends State<PaymentFailedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Payment Failed')),
+      appBar: AppBar(title: Text('결제 실패')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

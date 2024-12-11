@@ -33,7 +33,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load users: $e')),
+        SnackBar(content: Text('유저를 불러오는데 실패하였습니다.: $e')),
       );
     }
   }
@@ -82,20 +82,20 @@ class _UserManagementPageState extends State<UserManagementPage> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: Text('Manage Account: ${user['username']}'),
+              title: Text('계정 관리: ${user['username']}'),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    _buildManagementField('Username', _nameController, 'Edit username', true),
-                    _buildManagementField('Money', _moneyController, 'Edit point', true),
-                    _buildManagementField('Password', _passwordController, 'Enter new password', true, obscureText: true),
+                    _buildManagementField('ID', _nameController, 'Edit username', true),
+                    _buildManagementField('포인트', _moneyController, 'Edit point', true),
+                    _buildManagementField('비밀번호', _passwordController, 'Enter new password', true, obscureText: true),
                     if (isFestival)
-                      _buildManagementField('Activity Count', _activityCountController, 'Edit activity count', true),
+                      _buildManagementField('남은 활동 횟수', _activityCountController, 'Edit activity count', true),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Account Status'),
+                        Text('계정 상태'),
                         Switch(
                           value: !isSuspended,
                           onChanged: (value) {
@@ -110,7 +110,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     ElevatedButton(
                       onPressed: () => _confirmDeleteUser(user['id']),
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                      child: Text('Delete Account'),
+                      child: Text('계정 삭제'),
                     ),
                     if (isFestival)
                       ElevatedButton(
@@ -138,7 +138,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                             _fetchUsers();
                           }
                         },
-                        child: Text('Manage Products/Activities'),
+                        child: Text('상품/활동 관리'),
                       ),
                   ],
                 ),
@@ -148,7 +148,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Cancel'),
+                  child: Text('취소'),
                 ),
                 TextButton(
                   onPressed: () => _confirmSaveChanges(
@@ -159,7 +159,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     isSuspended,
                     isFestival ? int.tryParse(_activityCountController.text) ?? 0 : null,
                   ),
-                  child: Text('Save'),
+                  child: Text('저장'),
                 ),
               ],
             );
@@ -215,12 +215,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Save Changes'),
-        content: Text('Are you sure you want to save the changes?'),
+        title: Text('저장'),
+        content: Text('저장하시겠습니까?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
+            child: Text('취소'),
           ),
           TextButton(
             onPressed: () async {
@@ -237,7 +237,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
               if (!mounted) return;
               Navigator.of(context).pop();
             },
-            child: Text('Save'),
+            child: Text('저장'),
           ),
         ],
       ),
@@ -275,16 +275,16 @@ class _UserManagementPageState extends State<UserManagementPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Selected Accounts Money Manage'),
+        title: Text('포인트 관리'),
         content: TextField(
           controller: _moneyController,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(hintText: 'Enter new money amount'),
+          decoration: InputDecoration(hintText: '포인트 양을 입력해주세요.'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
+            child: Text('취소'),
           ),
           TextButton(
             onPressed: () async {
@@ -305,10 +305,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
               await _fetchUsers();
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Selected users updated successfully.')),
+                SnackBar(content: Text('수정 완료되었습니다.')),
               );
             },
-            child: Text('Update'),
+            child: Text('수정'),
           ),
         ],
       ),
@@ -319,12 +319,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Selected Accounts'),
-        content: Text('Are you sure you want to delete all selected accounts?'),
+        title: Text('계정 삭제'),
+        content: Text('계정들을 삭제하시겠습니까?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancel'),
+            child: Text('취소'),
           ),
           TextButton(
             onPressed: () async {
@@ -350,10 +350,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
               _selectedUserIds.clear();
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Selected accounts have been deleted.')),
+                SnackBar(content: Text('계정 삭제 완료')),
               );
             },
-            child: Text('Delete'),
+            child: Text('삭제'),
           ),
         ],
       ),
@@ -366,11 +366,11 @@ class _UserManagementPageState extends State<UserManagementPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Management'),
+        title: Text('유저 관리'),
         actions: [
           Row(
             children: [
-              Text('Select All'),
+              Text('모두 선택'),
               Checkbox(
                 value: _selectAll,
                 onChanged: (value) {
@@ -406,7 +406,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     _updateDisplayedUsers();
                   });
                 },
-                child: Text('Users', style: TextStyle(color: _selectedRole == 'user' ? Colors.blue : Colors.grey)),
+                child: Text('유저', style: TextStyle(color: _selectedRole == 'user' ? Colors.blue : Colors.grey)),
               ),
               TextButton(
                 onPressed: () {
@@ -418,7 +418,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     _updateDisplayedUsers();
                   });
                 },
-                child: Text('Clubs', style: TextStyle(color: _selectedRole == 'festival' ? Colors.blue : Colors.grey)),
+                child: Text('동아리', style: TextStyle(color: _selectedRole == 'festival' ? Colors.blue : Colors.grey)),
               ),
             ],
           ),
@@ -433,7 +433,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     return (displayedCount < totalUsersOfRole)
                         ? TextButton(
                       onPressed: _loadMoreUsers,
-                      child: Text("Load More"),
+                      child: Text("더보기"),
                     )
                         : Container();
                   }
@@ -468,7 +468,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     ),
                     trailing: ElevatedButton(
                       onPressed: () => _showUserOptionsDialog(user),
-                      child: Text('Manage'),
+                      child: Text('관리'),
                     ),
                   );
                 },
@@ -484,12 +484,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 children: [
                   ElevatedButton(
                     onPressed: _manageSelectedUsersMoney,
-                    child: Text('Manage Money'),
+                    child: Text('포인트 관리'),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     onPressed: _deleteSelectedUsers,
-                    child: Text('Delete Accounts'),
+                    child: Text('계정 삭제'),
                   ),
                 ],
               ),

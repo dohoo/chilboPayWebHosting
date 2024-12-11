@@ -14,6 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -31,6 +32,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
+    setState(() {
+      _errorMessage = null; // 로그인 시도 전에 오류 메시지 초기화
+    });
+
     try {
       final data = await LoginApi.login(  // LoginApi 사용
         _usernameController.text,
@@ -46,10 +51,9 @@ class _LoginPageState extends State<LoginPage> {
 
       _navigateToRolePage(data['role']);
     } catch (e) {
-      print('An error occurred: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
+      setState(() {
+        _errorMessage = '로그인에 실패하였습니다. 다시 시도해주세요.'; // 오류 메시지 설정
+      });
     }
   }
 
@@ -201,7 +205,20 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              Spacer(flex: 4),
+              Spacer(flex: 1),
+              if (_errorMessage != null) // 오류 메시지가 있을 때만 표시
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontFamily: 'SUIT-Light',
+                      fontSize: 14.0,
+                    ),
+                  ),
+                ),
+              Spacer(flex: 3),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: SizedBox(

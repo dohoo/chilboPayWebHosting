@@ -176,9 +176,6 @@ class HomePageState extends State<HomePage> {
     final formattedMoney = "${formatCurrency.format(money)}P";
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('결제하기'),
-      ),
       body: Column(
         children: <Widget>[
           Expanded(

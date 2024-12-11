@@ -29,9 +29,8 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
         _calculateTotalAmount();
       });
     } catch (e) {
-      print('Error fetching products: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load products')),
+        SnackBar(content: Text('상품 불러오기 실패')),
       );
     }
   }
@@ -52,7 +51,7 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
   void _showPaymentMethodDialog() {
     if (totalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select at least one product')),
+        SnackBar(content: Text('최소한 한 개의 상품을 선택해주세요.')),
       );
       return;
     }
@@ -66,8 +65,8 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Choose Payment Method"),
-          content: Text("Select a payment method for this purchase."),
+          title: Text("결제 방법을 선택해주세요."),
+          content: Text("결제 방법을 선택해주세요."),
           actions: [
             TextButton(
               onPressed: () {
@@ -79,7 +78,7 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
                   ),
                 );
               },
-              child: Text("NFC Payment"),
+              child: Text("카드 결제"),
             ),
             TextButton(
               onPressed: () {
@@ -91,7 +90,7 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
                   ),
                 );
               },
-              child: Text("QR Payment"),
+              child: Text("QR 결제"),
             ),
           ],
         );
@@ -105,7 +104,7 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Card Payment'),
+        title: Text('카드 결제'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.settings),
@@ -170,13 +169,13 @@ class _CardPaymentPageState extends State<CardPaymentPage> {
             child: Column(
               children: [
                 Text(
-                  'Total: $totalAmount',
+                  '합계: $totalAmount',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _showPaymentMethodDialog,
-                  child: Text('Proceed to Payment'),
+                  child: Text('결제'),
                 ),
               ],
             ),

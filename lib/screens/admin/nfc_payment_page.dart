@@ -14,13 +14,13 @@ class NfcPaymentPage extends StatefulWidget {
 }
 
 class _NfcPaymentPageState extends State<NfcPaymentPage> {
-  String message = 'Please tap your NFC card';
+  String message = '카드를 핸드폰 뒷면에 대주세요.';
   bool isLoading = false;
 
   Future<void> _payNfcCard() async {
     setState(() {
       isLoading = true; // Start loading
-      message = 'Processing payment...';
+      message = '결제 진행중...';
     });
 
     try {
@@ -48,7 +48,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
               context,
               MaterialPageRoute(
                 builder: (context) => PaymentFailedPage(
-                  errorMessage: result['message'] ?? 'Unknown error occurred',
+                  errorMessage: result['message'] ?? '오류가 발생하였습니다.',
                 ),
               ),
             );
@@ -59,7 +59,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
 
       // Payment completed successfully
       setState(() {
-        message = 'Payment completed successfully!';
+        message = '결제 완료!';
       });
 
       // Navigate to PaymentCompletePage on success
@@ -100,7 +100,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Payment NFC Card'),
+        title: Text('카드 결제'),
       ),
       body: Center(
         child: Padding(
@@ -111,7 +111,7 @@ class _NfcPaymentPageState extends State<NfcPaymentPage> {
             children: [
               CircularProgressIndicator(), // 로딩 표시
               SizedBox(height: 16),
-              Text('Processing payment...'),
+              Text('결제 진행중...'),
             ],
           )
               : Text(message),
