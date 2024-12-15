@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginApi {
-  static const String baseUrl = 'http://114.204.195.233';
+  static const String baseUrl = 'http://api.chilbopay.com';
 
   // 로그인 요청을 처리하는 메서드
   static Future<Map<String, dynamic>> login(String username, String password) async {

@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class UserApi {
-  static const String baseUrl = 'http://114.204.195.233';
+  static const String baseUrl = 'http://api.chilbopay.com';
   static const Map<String, String> headers = {
     'Content-Type': 'application/json; charset=UTF-8',
   };

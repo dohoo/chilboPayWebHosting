@@ -135,9 +135,12 @@ class _AdminSettingsPageState extends State<AdminSettingsPage> {
                       );
                       if (result != null) {
                         setState(() {
-                          products = result['products'];
-                          activities = result['activities'];
+                          // null 체크 후 값을 할당
+                          products = result['상품'] ?? [];
+                          activities = result['활동'] ?? [];
                         });
+                      } else {
+                        debugPrint("Result is null, no changes made.");
                       }
                     },
                     child: Text('상품/활동 추가하기'),

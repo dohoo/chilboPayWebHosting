@@ -67,6 +67,8 @@ class _ProductManagePageState extends State<ProductManagePage> {
         nameController.clear();
         priceController.clear();
       });
+    } else {
+      debugPrint("Invalid item input: name=$name, price=$price");
     }
   }
 
@@ -208,13 +210,13 @@ class _ProductManagePageState extends State<ProductManagePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(context, {'상품': products, '활동': activities});
-        },
-        child: Icon(Icons.check),
-        tooltip: '저장',
-      ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.pop(context, {'상품': products, '활동': activities});
+          },
+          child: Icon(Icons.check),
+          tooltip: '저장',
+        ),
     );
   }
 }

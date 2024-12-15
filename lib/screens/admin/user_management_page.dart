@@ -115,7 +115,9 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     if (isFestival)
                       ElevatedButton(
                         onPressed: () async {
-                          Navigator.pop(context);
+                          debugPrint("Fetching products and activities for user ID: ${user['id']}");
+                          Navigator.pop(context); // Close the dialog
+
                           final products = (await AdminApi.fetchFestivalProducts(user['id'])).cast<Map<String, dynamic>>();
                           final activities = (await AdminApi.fetchFestivalActivities(user['id'])).cast<Map<String, dynamic>>();
 
@@ -130,12 +132,18 @@ class _UserManagementPageState extends State<UserManagementPage> {
                           );
 
                           if (result != null) {
-                            await AdminApi.updateUserProductsAndActivities(
-                              user['id'],
-                              result['products'],
-                              result['activities'],
-                            );
-                            _fetchUsers();
+                            try {
+                              await AdminApi.updateUserProductsAndActivities(
+                                user['id'],
+                                result['상품'] ?? [],
+                                result['활동'] ?? [],
+                              );
+                              _fetchUsers(); // Refresh users list
+                            } catch (e) {
+                              debugPrint("Failed to update products and activities: $e");
+                            }
+                          } else {
+                            debugPrint("No changes returned from ProductManagePage.");
                           }
                         },
                         child: Text('상품/활동 관리'),
