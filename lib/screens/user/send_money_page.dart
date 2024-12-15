@@ -109,11 +109,6 @@ class _SendMoneyPageState extends State<SendMoneyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar에서 'Send Money' 글자 제거
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
