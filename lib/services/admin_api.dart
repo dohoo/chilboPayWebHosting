@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class AdminApi {
-  static const String baseUrl = 'http://api.chilbopay.com';
+  static const String baseUrl = 'https://api.chilbopay.com';
 
   // Fetch all products
   static Future<List<dynamic>> fetchProducts() async {
