@@ -159,7 +159,7 @@ class _FestivalPaymentPageState extends State<FestivalPaymentPage> with SingleTi
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Festival 결제'),
+        title: Text('동아리 결제 창'),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(60),
           child: Column(

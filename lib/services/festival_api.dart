@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class FestivalApi {
-  static const String baseUrl = 'http://api.chilbopay.com';
+  static const String baseUrl = 'https://api.chilbopay.com';
 
   static Future<List<dynamic>> fetchFestivalAccounts() async {
     final response = await http.get(Uri.parse('$baseUrl/festivalAccounts'));
