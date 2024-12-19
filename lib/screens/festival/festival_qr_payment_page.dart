@@ -36,7 +36,18 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showLogMessage('[initState]: productId=${widget.productId}, festivalId=${widget.festivalId}, isActivity=${widget.isActivity}');
+      _startCamera();
     });
+  }
+
+// 카메라를 시작하는 메서드
+  void _startCamera() {
+    try {
+      scannerController.start();
+      _showLogMessage('Camera started successfully');
+    } catch (e) {
+      _showLogMessage('Failed to start camera: $e');
+    }
   }
 
   @override
