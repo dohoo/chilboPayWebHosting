@@ -25,18 +25,40 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
   bool isProcessing = false;
   bool isScanned = false; // 중복 스캔 방지용 플래그
 
+  void _showLogMessage(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), duration: Duration(seconds: 2)),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showLogMessage('[initState]: productId=${widget.productId}, festivalId=${widget.festivalId}, isActivity=${widget.isActivity}');
+    });
+  }
+
   @override
   void dispose() {
+    _showLogMessage('[dispose]: Scanner controller disposing...');
     scannerController.dispose();
     super.dispose();
   }
 
   Future<void> _onDetect(BarcodeCapture capture) async {
+    _showLogMessage('_onDetect called');
     // 이미 처리 중이거나, 한 번 스캔된 상태라면 무시
-    if (isProcessing || isScanned) return;
+    if (isProcessing || isScanned) {
+      _showLogMessage('_onDetect: Already processing or scanned. isProcessing=$isProcessing, isScanned=$isScanned');
+      return;
+    }
 
     final barcodes = capture.barcodes;
+    _showLogMessage('_onDetect: barcodes count=${barcodes.length}');
+
     if (barcodes.isEmpty) {
+      _showLogMessage('_onDetect: No barcode detected');
       setState(() {
         message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.';
       });
@@ -45,7 +67,10 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
 
     // 여러개 감지 시 첫 번째 바코드만 처리
     final code = barcodes.first.rawValue;
+    _showLogMessage('_onDetect: First barcode rawValue=$code');
+
     if (code == null || code.isEmpty) {
+      _showLogMessage('_onDetect: Barcode code is null or empty');
       setState(() {
         message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.';
       });
@@ -58,19 +83,24 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
       message = '결제 진행중...';
     });
 
+    _showLogMessage('_onDetect: Starting payment with code=$code, productId=${widget.productId}, isActivity=${widget.isActivity}');
+
     try {
       final result = await FestivalApi.processQrPaymentWithToken(
         code,
         widget.productId,
         widget.isActivity,
       );
+      _showLogMessage('Payment API call result: $result');
 
       if (result['success']) {
+        _showLogMessage('Payment succeeded. Navigating to PaymentSuccessPage.');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => PaymentSuccessPage()),
         );
       } else {
+        _showLogMessage('Payment failed. Reason: ${result['message'] ?? 'Unknown error'}');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -81,6 +111,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
         );
       }
     } catch (e) {
+      _showLogMessage('Payment API call exception: $e');
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -93,11 +124,13 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
       setState(() {
         isProcessing = false;
       });
+      _showLogMessage('Payment process completed. isProcessing set to false.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    _showLogMessage('[build]: message="$message", isProcessing=$isProcessing, isScanned=$isScanned');
     return Scaffold(
       appBar: AppBar(
         title: Text('QR Code Payment'),
@@ -108,7 +141,6 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
             flex: 5,
             child: MobileScanner(
               controller: scannerController,
-              // 콜백 시그니처 변경된 형태
               onDetect: (capture) => _onDetect(capture),
             ),
           ),
