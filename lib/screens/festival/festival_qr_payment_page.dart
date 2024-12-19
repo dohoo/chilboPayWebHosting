@@ -22,7 +22,7 @@ class FestivalQrPaymentPage extends StatefulWidget {
 class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage>
     with WidgetsBindingObserver {
   final MobileScannerController _controller = MobileScannerController();
-  String message = 'QR코드를fmffmmffmmfff 카메라에 대주세요.';
+  String message = 'QR코드를 카메라에 대주세요.(테스트용 텍스트)';
   bool isProcessing = false;
 
   @override
@@ -62,7 +62,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage>
     final token = capture.barcodes.first.rawValue;
     if (token == null || token.isEmpty) {
       setState(() {
-        message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.';
+        message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.(테스트용 텍스트)';
       });
       return;
     }
@@ -89,7 +89,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage>
           context,
           MaterialPageRoute(
             builder: (context) => PaymentFailedPage(
-              errorMessage: result['message'] ?? '결제에 실패하였습니다.',
+              errorMessage: result['message'] ?? '결제에 실패하였습니다.(테스트용 텍스트)',
             ),
           ),
         );
@@ -99,7 +99,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage>
         context,
         MaterialPageRoute(
           builder: (context) => PaymentFailedPage(
-            errorMessage: '결제에 실패하였습니다.',
+            errorMessage: '결제에 실패하였습니다.(테스트용 텍스트)',
           ),
         ),
       );
@@ -113,7 +113,7 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('QR Code Payment')),
+      appBar: AppBar(title: Text('QR Code Payment(테스트용 텍스트)')),
       body: Column(
         children: <Widget>[
           Expanded(
