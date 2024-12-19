@@ -31,11 +31,20 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
     super.dispose();
   }
 
-  void _onDetect(Barcode barcode, MobileScannerArguments? args) async {
+  Future<void> _onDetect(BarcodeCapture capture) async {
     // 이미 처리 중이거나, 한 번 스캔된 상태라면 무시
     if (isProcessing || isScanned) return;
 
-    final String? code = barcode.rawValue;
+    final barcodes = capture.barcodes;
+    if (barcodes.isEmpty) {
+      setState(() {
+        message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.';
+      });
+      return;
+    }
+
+    // 여러개 감지 시 첫 번째 바코드만 처리
+    final code = barcodes.first.rawValue;
     if (code == null || code.isEmpty) {
       setState(() {
         message = 'QR코드가 유효하지 않습니다. 다시 시도해주세요.';
@@ -99,7 +108,8 @@ class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage> {
             flex: 5,
             child: MobileScanner(
               controller: scannerController,
-              onDetect: (barcode, args) => _onDetect(barcode, args),
+              // 콜백 시그니처 변경된 형태
+              onDetect: (capture) => _onDetect(capture),
             ),
           ),
           Expanded(
