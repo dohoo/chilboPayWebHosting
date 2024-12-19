@@ -22,7 +22,7 @@ class FestivalQrPaymentPage extends StatefulWidget {
 class _FestivalQrPaymentPageState extends State<FestivalQrPaymentPage>
     with WidgetsBindingObserver {
   final MobileScannerController _controller = MobileScannerController();
-  String message = 'QR코드를 카메라에 대주세요.';
+  String message = 'QR코드를fmffmmffmmfff 카메라에 대주세요.';
   bool isProcessing = false;
 
   @override
