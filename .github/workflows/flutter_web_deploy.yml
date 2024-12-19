@@ -1,0 +1,31 @@
+name: Flutter Web Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push될 때 배포 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # steps:
+    # - name: Checkout repository
+    #   uses: actions/checkout@v4.2.2
+
+    # - name: Install Flutter
+    #   uses: subosito/flutter-action@v2.18.0
+    #   with:
+    #     flutter-version: '3.24.4'  # Flutter 버전 지정
+
+    # - name: Enable web
+    #   run: flutter config --enable-web
+
+    # - name: Build Flutter web
+    #   run: flutter build web --release
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4.0.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: /
